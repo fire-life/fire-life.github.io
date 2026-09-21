@@ -38,13 +38,14 @@
 
   <div class="card">
     <h2>条件入力</h2>
+    <p class="note">※初期値は入力例です。ご自身の状況に変更してください。</p>
     <div class="grid">
-      <label>現在年齢<input id="age" type="number" value="30"></label>
-      <label>現在の資産（万円）<input id="assets" type="number" value="300"></label>
-      <label>毎月の積立額（万円）<input id="monthly" type="number" value="3" step="0.1"></label>
-      <label>想定年利（%）<input id="return" type="number" value="5" step="0.1"></label>
-      <label>年間生活費（万円）<input id="spend" type="number" value="240"></label>
-      <label>FIRE後の年間収入（万円）<input id="income" type="number" value="0"></label>
+      <label>現在年齢<input id="age" type="number" min="18" max="79" step="1" value="30"></label>
+      <label>現在の資産（万円）<input id="assets" type="number" min="0" step="1" value="300"></label>
+      <label>毎月の積立額（万円）<input id="monthly" type="number" min="0" step="0.1" value="3"></label>
+      <label>想定年利（%）<input id="return" type="number" min="0" max="20" step="0.1" value="5"></label>
+      <label>年間生活費（万円）<input id="spend" type="number" min="0" step="1" value="240"></label>
+      <label>FIRE後の年間収入（万円）<input id="income" type="number" min="0" step="1" value="0"></label>
     </div>
     <button onclick="simulate()">シミュレーションする</button>
   </div>

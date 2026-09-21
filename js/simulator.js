@@ -17,45 +17,342 @@ function yen(n) {
 function calcTarget(spend, income, rate) {
   return Math.max(0, spend - income) / rate;
 }
+
+/* =========================
+   入力値バリデーション
+========================= */
+
+function validateInputs() {
+  const rules = [
+    {
+      id: "age",
+      label: "年齢",
+      min: 18,
+      max: 79,
+      integer: true
+    },
+    {
+      id: "assets",
+      label: "現在の資産",
+      min: 0
+    },
+    {
+      id: "monthly",
+      label: "毎月の積立額",
+      min: 0
+    },
+    {
+      id: "return",
+      label: "想定利回り",
+      min: 0,
+      max: 20
+    },
+    {
+      id: "spend",
+      label: "年間生活費",
+      min: 0
+    },
+    {
+      id: "income",
+      label: "FIRE後の収入",
+      min: 0
+    }
+  ];
+
+  // 以前のエラー表示を削除
+  const oldError = document.getElementById("validationError");
+
+  if (oldError) {
+    oldError.remove();
+  }
+
+  // 以前のエラー状態を解除
+  rules.forEach((rule) => {
+    const input = document.getElementById(rule.id);
+
+    if (input) {
+      input.removeAttribute("aria-invalid");
+    }
+  });
+
+  // 1項目ずつチェック
+  for (const rule of rules) {
+    const input = document.getElementById(rule.id);
+
+    if (!input) {
+      continue;
+    }
+
+    const raw = input.value.trim();
+
+    // 空欄
+    if (raw === "") {
+      showValidationError(
+        `${rule.label}を入力してください。`,
+        input
+      );
+      return false;
+    }
+
+    // 数字・小数点以外の表記を禁止
+    if (!/^\d+(\.\d+)?$/.test(raw)) {
+      showValidationError(
+        `${rule.label}は通常の数値で入力してください。`,
+        input
+      );
+      return false;
+    }
+
+    // 数値以外
+    const value = Number(raw);
+
+    if (!Number.isFinite(value)) {
+      showValidationError(
+        `${rule.label}は数値で入力してください。`,
+        input
+      );
+      return false;
+    }
+
+    // 整数チェック
+    if (
+      rule.integer &&
+      !Number.isInteger(value)
+    ) {
+      showValidationError(
+        `${rule.label}は整数で入力してください。`,
+        input
+      );
+      return false;
+    }
+
+    // 最小値
+    if (
+      rule.min !== undefined &&
+      value < rule.min
+    ) {
+      showValidationError(
+        `${rule.label}は${rule.min}以上で入力してください。`,
+        input
+      );
+      return false;
+    }
+
+    // 最大値
+    if (
+      rule.max !== undefined &&
+      value > rule.max
+    ) {
+      showValidationError(
+        `${rule.label}は${rule.max}以下で入力してください。`,
+        input
+      );
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/* =========================
+   エラー表示
+========================= */
+
+function showValidationError(message, input) {
+  const error = document.createElement("div");
+
+  error.id = "validationError";
+  error.textContent = message;
+
+  error.style.background = "#fff1f2";
+  error.style.border = "1px solid #fecdd3";
+  error.style.borderRadius = "8px";
+  error.style.padding = "12px 14px";
+  error.style.marginTop = "14px";
+  error.style.color = "#be123c";
+  error.style.fontSize = "14px";
+  error.style.lineHeight = "1.6";
+
+  // summaryの前にエラーを表示
+  const summary = document.getElementById("summary");
+
+  if (summary) {
+    summary.parentNode.insertBefore(
+      error,
+      summary
+    );
+  }
+
+  // 入力欄をエラー状態にする
+  input.setAttribute(
+    "aria-invalid",
+    "true"
+  );
+
+  // エラー箇所へ移動
+  input.focus();
+}
+
+/* =========================
+   シミュレーション
+========================= */
+
 function simulate() {
-  const age = +document.getElementById("age").value;
-  let assets = +document.getElementById("assets").value;
-  const monthly = +document.getElementById("monthly").value;
-  const r = +document.getElementById("return").value / 100;
-  const spend = +document.getElementById("spend").value;
-  const income = +document.getElementById("income").value;
-  const rates = [0.03, 0.035, 0.04];
+
+  // 入力値チェック
+  if (!validateInputs()) {
+    return;
+  }
+
+  const age =
+    +document.getElementById("age").value;
+
+  let assets =
+    +document.getElementById("assets").value;
+
+  const monthly =
+    +document.getElementById("monthly").value;
+
+  const r =
+    +document.getElementById("return").value / 100;
+
+  const spend =
+    +document.getElementById("spend").value;
+
+  const income =
+    +document.getElementById("income").value;
+
+  const rates = [
+    0.03,
+    0.035,
+    0.04
+  ];
+
   const rows = [];
   let age40 = assets;
-  let series = [{ age, assets }];
+
+  let series = [
+    {
+      age,
+      assets
+    }
+  ];
+
   let found = {};
-  for (let y = 1; y <= 80 - age; y++) {
+
+  for (
+    let y = 1;
+    y <= 80 - age;
+    y++
+  ) {
+
     // 年末に積立すると仮定した簡易計算
-    assets = assets * (1 + r) + monthly * 12;
+    assets =
+      assets * (1 + r) +
+      monthly * 12;
+
     const a = age + y;
-    series.push({ age: a, assets });
+
+    series.push({
+      age: a,
+      assets
+    });
+
     rates.forEach((rate) => {
-      const target = calcTarget(spend, income, rate);
-      if (found[rate] === undefined && assets >= target) found[rate] = a;
+
+      const target =
+        calcTarget(
+          spend,
+          income,
+          rate
+        );
+
+      if (
+        found[rate] === undefined &&
+        assets >= target
+      ) {
+        found[rate] = a;
+      }
     });
   }
   let html = "";
   rates.forEach((rate) => {
-    const target = calcTarget(spend, income, rate);
+
+    const target =
+      calcTarget(
+        spend,
+        income,
+        rate
+      );
+
     const fa =
-      found[rate] === undefined ? "80歳までに未達" : found[rate] + "歳";
-    html += `<div class="result"><div>${(rate * 100).toFixed(1)}%取り崩し</div><div class="big">${yen(target)}</div><div>到達目安：${fa}</div></div>`;
+      found[rate] === undefined
+        ? "80歳までに未達"
+        : found[rate] + "歳";
+
+    html += `
+      <div class="result">
+        <div>${(rate * 100).toFixed(1)}%取り崩し</div>
+        <div class="big">${yen(target)}</div>
+        <div>到達目安：${fa}</div>
+      </div>
+    `;
   });
-  document.getElementById("summary").innerHTML = html;
+
+  document.getElementById(
+    "summary"
+  ).innerHTML = html;
+
   let t =
-    "<table><tr><th>取り崩し率</th><th>必要資産</th><th>FIRE到達年齢</th></tr>";
+    "<table>" +
+    "<tr>" +
+    "<th>取り崩し率</th>" +
+    "<th>必要資産</th>" +
+    "<th>FIRE到達年齢</th>" +
+    "</tr>";
+
   rates.forEach((rate) => {
-    t += `<tr><td>${(rate * 100).toFixed(1)}%</td><td>${yen(calcTarget(spend, income, rate))}</td><td>${found[rate] === undefined ? "80歳までに未達" : found[rate] + "歳"}</td></tr>`;
+
+    t += `
+      <tr>
+        <td>${(rate * 100).toFixed(1)}%</td>
+        <td>${yen(
+          calcTarget(
+            spend,
+            income,
+            rate
+          )
+        )}</td>
+        <td>${
+          found[rate] === undefined
+            ? "80歳までに未達"
+            : found[rate] + "歳"
+        }</td>
+      </tr>
+    `;
   });
   t += "</table>";
-  document.getElementById("table").innerHTML = t;
-  draw(series, calcTarget(spend, income, 0.04), found[0.04]);
+
+  document.getElementById(
+    "table"
+  ).innerHTML = t;
+
+  // グラフ
+  draw(
+    series,
+    calcTarget(
+      spend,
+      income,
+      0.04
+    ),
+    found[0.04]
+  );
 }
+
+/* =========================
+   グラフ
+========================= */
+
 function draw(series, target, fireAge) {
   const c = document.getElementById("chart");
   const ctx = c.getContext("2d");
@@ -449,4 +746,26 @@ function draw(series, target, fireAge) {
 window.addEventListener("resize", () => {
   simulate();
 });
+
+// =========================
+// 数値入力で e / E / + / - を禁止
+// =========================
+
+const numberInputs = document.querySelectorAll(
+  'input[type="number"]'
+);
+
+numberInputs.forEach((input) => {
+  input.addEventListener("keydown", (e) => {
+    if (
+      e.key === "e" ||
+      e.key === "E" ||
+      e.key === "+" ||
+      e.key === "-"
+    ) {
+      e.preventDefault();
+    }
+  });
+});
+
 simulate();
