@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>FIRE達成時期シミュレーター MVP</title>
+
+  <!-- Google Search Console -->
+  <meta name="google-site-verification" content="Y9g1kMQJwi6HpaXdRKzJb4nqKXXeWTmrJdP54yDt7sQ" />
+
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/simulator.js" defer></script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NG20VCZBQ1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-NG20VCZBQ1');
+  </script>
+  
+  <!-- Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "yljt2ghzxx");
+  </script>
+</head>
+
+<body>
+  <h1>FIRE達成時期シミュレーター</h1>
+  <p class="note">MVP版：現在資産・積立・利回り・生活費から、FIRE目標額と到達年齢を概算します。</p>
+
+  <div class="card">
+    <h2>条件入力</h2>
+    <div class="grid">
+      <label>現在年齢<input id="age" type="number" value="30"></label>
+      <label>現在の資産（万円）<input id="assets" type="number" value="300"></label>
+      <label>毎月の積立額（万円）<input id="monthly" type="number" value="3" step="0.1"></label>
+      <label>想定年利（%）<input id="return" type="number" value="5" step="0.1"></label>
+      <label>年間生活費（万円）<input id="spend" type="number" value="240"></label>
+      <label>FIRE後の年間収入（万円）<input id="income" type="number" value="0"></label>
+    </div>
+    <button onclick="simulate()">シミュレーションする</button>
+  </div>
+
+  <div class="card">
+    <h2>結果</h2>
+    <div class="results" id="summary"></div>
+    <div id="table"></div>
+  </div>
+
+<div class="card">
+  <h2>資産推移</h2>
+  <canvas id="chart" width="900" height="300"></canvas>
+
+  <p class="chart-note">
+    ※ グラフは4%取り崩し率を基準に表示しています。
+  </p>
+</div>
+
+  <div class="card warn">
+    <strong>注意</strong><br>
+    これは一定の年利で運用し、毎月一定額を積み立てる単純モデルです。実際の市場ではリターンが年ごとに変動し、税金・インフレ・手数料・社会保障・住宅ローン・教育費なども結果に影響します。また、3%・3.5%・4%は「安全を保証する率」ではありません。特にFIREは30年以上の運用期間になる可能性があるため、複数の取り崩し率を比較する設計にしています。
+  </div>
+</body>
+
+</html>
