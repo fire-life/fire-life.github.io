@@ -1,38 +1,96 @@
 body {
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-    max-width: 1000px;
+    max-width: 900px;
     margin: 0 auto;
     padding: 24px;
     background: #f6f7f9;
-    color: #222
+    color: #222;
+    line-height: 1.8;
 }
 
 h1 {
-    margin-bottom: 6px
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+h2 {
+    margin-top: 0;
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+h3 {
+    margin-top: 24px;
+}
+
+p {
+    margin: 12px 0;
 }
 
 .note {
     color: #666;
-    font-size: 14px
+    font-size: 14px;
 }
+
+/* ====================
+   カード
+==================== */
 
 .card {
     background: #fff;
     border-radius: 14px;
-    padding: 20px;
-    margin: 16px 0;
-    box-shadow: 0 2px 10px #0000000d
+    padding: 24px;
+    margin: 20px 0;
+    box-shadow: 0 2px 10px #0000000d;
 }
+
+/* ====================
+   重要ポイント
+==================== */
+
+.highlight {
+    background: #f1f5f9;
+    border-left: 4px solid #222;
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin: 20px 0;
+}
+
+.highlight strong {
+    font-size: 1.1rem;
+}
+
+/* ====================
+   リンク
+==================== */
+
+a {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ====================
+   グリッド
+==================== */
 
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 14px
+    gap: 14px;
 }
+
+/* ====================
+   入力フォーム
+==================== */
 
 label {
     font-size: 14px;
-    color: #555
+    color: #555;
 }
 
 input {
@@ -42,8 +100,12 @@ input {
     margin-top: 5px;
     border: 1px solid #ccc;
     border-radius: 8px;
-    font-size: 16px
+    font-size: 16px;
 }
+
+/* ====================
+   ボタン
+==================== */
 
 button {
     padding: 12px 20px;
@@ -53,64 +115,125 @@ button {
     color: #fff;
     font-size: 16px;
     cursor: pointer;
-    margin-top: 16px
+    margin-top: 16px;
 }
+
+button:hover {
+    opacity: 0.85;
+}
+
+/* ====================
+   シミュレーター結果
+==================== */
 
 .results {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px
+    gap: 10px;
 }
 
 .result {
     padding: 15px;
     background: #f1f3f5;
-    border-radius: 10px
+    border-radius: 10px;
 }
 
 .big {
     font-size: 24px;
-    font-weight: 700
+    font-weight: 700;
 }
+
+/* ====================
+   表
+==================== */
 
 table {
     width: 100%;
-    border-collapse: collapse
+    border-collapse: collapse;
+    margin: 18px 0;
+    background: #fff;
 }
 
 th,
 td {
-    padding: 9px;
+    padding: 10px 12px;
     border-bottom: 1px solid #ddd;
-    text-align: right
+    text-align: right;
+}
+
+th {
+    background: #f1f3f5;
+    font-weight: 600;
 }
 
 th:first-child,
 td:first-child {
-    text-align: left
+    text-align: left;
 }
+
+/* ====================
+   グラフ
+==================== */
 
 canvas {
     width: 100%;
     height: 300px;
     border: 1px solid #eee;
-    border-radius: 10px
+    border-radius: 10px;
 }
+
+.chart-note {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #666;
+}
+
+/* ====================
+   注意事項
+==================== */
 
 .warn {
     font-size: 13px;
     color: #666;
-    line-height: 1.6
+    line-height: 1.7;
+    background: #fafafa;
 }
 
-.chart-note {
-  margin-top: 10px;
-  font-size: 13px;
-  color: #666;
-}
+/* ====================
+   スマホ
+==================== */
 
 @media(max-width:650px) {
-    .results {
-    grid-template-columns: 1fr
+
+    body {
+        padding: 14px;
+        font-size: 15px;
     }
+
+    h1 {
+        font-size: 1.7rem;
+    }
+
+    h2 {
+        font-size: 1.35rem;
+    }
+
+    .card {
+        padding: 18px;
+        margin: 14px 0;
+    }
+
+    .results {
+        grid-template-columns: 1fr;
+    }
+
+    table {
+        font-size: 14px;
+    }
+
+    th,
+    td {
+        padding: 8px;
+    }
+
 }
