@@ -197,11 +197,16 @@ function showValidationError(message, input) {
    シミュレーション
 ========================= */
 
-function simulate() {
+function simulate(userAction = false) {
 
   // 入力値チェック
   if (!validateInputs()) {
     return;
+  }
+
+  // GA4：ユーザーが実際にシミュレーションを実行した
+  if (userAction && typeof gtag === "function") {
+    gtag("event", "simulation_run");
   }
 
   const age =
