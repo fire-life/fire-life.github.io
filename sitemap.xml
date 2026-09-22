@@ -4,6 +4,12 @@
         <loc>https://fire-life.github.io/</loc>
     </url>
     <url>
+        <loc>https://fire-life.github.io/articles/fire-1000man/</loc>
+    </url>
+    <url>
+        <loc>https://fire-life.github.io/articles/fire-2000man/</loc>
+    </url>
+    <url>
         <loc>https://fire-life.github.io/articles/fire-3000man/</loc>
     </url>
     <url>
@@ -12,7 +18,5 @@
     <url>
         <loc>https://fire-life.github.io/articles/fire-40/</loc>
     </url>
-    <url>
-        <loc>https://fire-life.github.io/articles/fire-1000man/</loc>
-    </url>
+
 </urlset>
