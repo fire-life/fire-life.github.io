@@ -1,3 +1,5 @@
+let lastChartData = null;
+
 function yen(n) {
   n = Math.round(n);
 
@@ -342,16 +344,45 @@ function simulate(userAction = false) {
     "table"
   ).innerHTML = t;
 
-  // グラフ
+  const chartTarget = calcTarget(spend, income, 0.04);
+  const chartFireAge = found[0.04];
+
+  lastChartData = {
+    series,
+    target: chartTarget,
+    fireAge: chartFireAge
+  };
+
   draw(
     series,
-    calcTarget(
-      spend,
-      income,
-      0.04
-    ),
-    found[0.04]
+    chartTarget,
+    chartFireAge
   );
+
+  // スマホでは計算後に結果へ移動
+  if (
+    userAction &&
+    window.innerWidth <= 650
+  ) {
+    const conditionPanel =
+      document.getElementById("conditionPanel");
+
+    if (conditionPanel) {
+      conditionPanel.open = false;
+    }
+
+    const results =
+      document.getElementById("results");
+
+    if (results) {
+      setTimeout(() => {
+        results.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }, 100);
+    }
+  }
 }
 
 /* =========================
@@ -749,7 +780,13 @@ function draw(series, target, fireAge) {
 // 画面サイズ変更時に再描画
 // ==================================================
 window.addEventListener("resize", () => {
-  simulate();
+  if (lastChartData) {
+    draw(
+      lastChartData.series,
+      lastChartData.target,
+      lastChartData.fireAge
+    );
+  }
 });
 
 // =========================
