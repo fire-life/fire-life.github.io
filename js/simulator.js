@@ -664,8 +664,7 @@ function draw(series, target, fireAge) {
       minAge,
       maxAge,
       xOf,
-      yOf,
-      formatAxisMoney
+      yOf
     }
   );
 }
@@ -681,17 +680,69 @@ function setupChartInteraction(
   fireAge,
   chart
 ) {
-  // ==================================================
-  // すでにイベント登録済みなら
-  // 最新データだけ更新
-  // ==================================================
+  /*
+   * ==================================================
+   * グラフ操作
+   *
+   * ポイント
+   * ・グラフ本体は再描画しない
+   * ・選択表示だけ別Canvasに描画
+   * ・requestAnimationFrameでiPhoneでも滑らかに追従
+   * ・年齢単位でスナップ
+   * ・スマホはドラッグ操作
+   * ・グラフ外タップでツールチップを閉じる
+   * ==================================================
+   */
+
+  const {
+    pad,
+    W,
+    H,
+    minAge,
+    maxAge,
+    xOf,
+    yOf
+  } = chart;
+
+  const parent = canvas.parentElement;
+
+  if (!parent) {
+    return;
+  }
+
+  /*
+   * --------------------------------------------------
+   * すでにイベント設定済みなら、
+   * 最新のグラフ情報だけ更新する
+   * --------------------------------------------------
+   */
+
   if (canvas.dataset.interactionReady === "true") {
     canvas._chartState = {
       series,
       target,
       fireAge,
-      chart
+      pad,
+      W,
+      H,
+      minAge,
+      maxAge,
+      xOf,
+      yOf
     };
+
+    /*
+     * グラフ本体が再描画された場合、
+     * 現在選択中のポイントも描き直す
+     */
+    if (
+      canvas._selectedIndex !== undefined &&
+      canvas._selectedIndex !== null
+    ) {
+      requestAnimationFrame(() => {
+        renderSelection();
+      });
+    }
 
     return;
   }
@@ -702,349 +753,278 @@ function setupChartInteraction(
     series,
     target,
     fireAge,
-    chart
+    pad,
+    W,
+    H,
+    minAge,
+    maxAge,
+    xOf,
+    yOf
   };
 
-  // ==================================================
-  // スマホでページスクロールさせず
-  // グラフ操作を優先
-  // ==================================================
-  canvas.style.touchAction = "none";
-  canvas.style.cursor = "crosshair";
+  canvas._selectedIndex = null;
 
-  // ==================================================
-  // ツールチップ
-  // ==================================================
-  const wrapper = canvas.parentElement;
+  /*
+   * ==================================================
+   * 親要素
+   * ==================================================
+   */
 
-  wrapper.style.position = "relative";
+  const parentStyle =
+    window.getComputedStyle(parent);
 
-  const tooltip = document.createElement("div");
-
-  tooltip.style.position = "absolute";
-  tooltip.style.display = "none";
-  tooltip.style.zIndex = "20";
-  tooltip.style.pointerEvents = "none";
-
-  tooltip.style.background =
-    "rgba(255,255,255,0.97)";
-
-  tooltip.style.border =
-    "1px solid #ddd";
-
-  tooltip.style.borderRadius = "10px";
-
-  tooltip.style.padding =
-    "10px 12px";
-
-  tooltip.style.boxShadow =
-    "0 4px 14px rgba(0,0,0,0.12)";
-
-  tooltip.style.fontSize = "13px";
-  tooltip.style.lineHeight = "1.5";
-  tooltip.style.color = "#222";
-
-  tooltip.style.minWidth = "145px";
-
-  wrapper.appendChild(tooltip);
-
-  // ==================================================
-  // 現在選択されているポイント
-  // ==================================================
-  let selectedIndex = null;
-
-  // ==================================================
-  // タッチ操作中か
-  // ==================================================
-  let isTouching = false;
-
-  // ==================================================
-  // PCのマウス操作中か
-  // ==================================================
-  let isMouseOver = false;
-
-  // ==================================================
-  // 最後に選択したポイント
-  // ==================================================
-  let lastSelectedIndex = null;
-
-  // ==================================================
-  // ツールチップ表示
-  // ==================================================
-  function showTooltip(
-    point,
-    screenX,
-    screenY
-  ) {
-    const state = canvas._chartState;
-
-    if (!state) {
-      return;
-    }
-
-    const targetValue = state.target;
-    const fireAgeValue = state.fireAge;
-
-    const reached =
-      fireAgeValue !== undefined &&
-      point.age >= fireAgeValue &&
-      point.assets >= targetValue;
-
-    let html = "";
-
-    html += `
-      <div style="
-        font-weight:700;
-        font-size:15px;
-        margin-bottom:4px;
-      ">
-        ${point.age}歳
-      </div>
-    `;
-
-    html += `
-      <div>
-        資産：
-        <strong>
-          ${Math.round(point.assets).toLocaleString()}万円
-        </strong>
-      </div>
-    `;
-
-    html += `
-      <div>
-        FIRE目標：
-        <strong>
-          ${Math.round(targetValue).toLocaleString()}万円
-        </strong>
-      </div>
-    `;
-
-    if (reached) {
-      html += `
-        <div style="
-          margin-top:4px;
-          font-weight:700;
-        ">
-          🎉 FIRE達成
-        </div>
-      `;
-    }
-
-    tooltip.innerHTML = html;
-
-    // 一旦表示
-    tooltip.style.display = "block";
-
-    const wrapperRect =
-      wrapper.getBoundingClientRect();
-
-    const tooltipWidth =
-      tooltip.offsetWidth;
-
-    const tooltipHeight =
-      tooltip.offsetHeight;
-
-    // ==================================================
-    // 基本位置
-    // ==================================================
-    let left =
-      screenX -
-      wrapperRect.left -
-      tooltipWidth / 2;
-
-    let top =
-      screenY -
-      wrapperRect.top -
-      tooltipHeight -
-      14;
-
-    const margin = 8;
-
-    // ==================================================
-    // 左右にはみ出さない
-    // ==================================================
-    left = Math.max(
-      margin,
-      Math.min(
-        left,
-        wrapperRect.width -
-          tooltipWidth -
-          margin
-      )
-    );
-
-    // ==================================================
-    // 上にはみ出した場合は下へ
-    // ==================================================
-    if (top < margin) {
-      top =
-        screenY -
-        wrapperRect.top +
-        14;
-    }
-
-    // ==================================================
-    // 下にもはみ出さない
-    // ==================================================
-    top = Math.min(
-      top,
-      wrapperRect.height -
-        tooltipHeight -
-        margin
-    );
-
-    tooltip.style.left =
-      Math.round(left) + "px";
-
-    tooltip.style.top =
-      Math.round(top) + "px";
+  if (parentStyle.position === "static") {
+    parent.style.position = "relative";
   }
 
-  // ==================================================
-  // ツールチップを消す
-  // ==================================================
-  function hideTooltip() {
-    tooltip.style.display = "none";
+  /*
+   * ==================================================
+   * 選択表示用Canvas
+   *
+   * グラフ本体とは完全に分離する
+   * ==================================================
+   */
 
-    selectedIndex = null;
-    lastSelectedIndex = null;
+  let overlay =
+    parent.querySelector(
+      ".chart-selection-overlay"
+    );
+
+  if (!overlay) {
+    overlay =
+      document.createElement("canvas");
+
+    overlay.className =
+      "chart-selection-overlay";
+
+    overlay.style.position = "absolute";
+    overlay.style.left = "0";
+    overlay.style.top = "0";
+    overlay.style.width = "100%";
+    overlay.style.height = "100%";
+
+    /*
+     * タッチイベントは本体Canvasで受け取る
+     */
+    overlay.style.pointerEvents = "none";
+
+    parent.appendChild(overlay);
   }
 
-  // ==================================================
-  // 指・マウスの位置から最も近いデータを取得
-  // ==================================================
-  function getNearestIndex(clientX) {
-    const state = canvas._chartState;
+  canvas._selectionCanvas = overlay;
+
+  /*
+   * ==================================================
+   * ツールチップ
+   * ==================================================
+   */
+
+  let tooltip =
+    parent.querySelector(
+      ".chart-touch-tooltip"
+    );
+
+  if (!tooltip) {
+    tooltip =
+      document.createElement("div");
+
+    tooltip.className =
+      "chart-touch-tooltip";
+
+    tooltip.style.position = "absolute";
+    tooltip.style.zIndex = "20";
+    tooltip.style.pointerEvents = "none";
+    tooltip.style.background = "#fff";
+    tooltip.style.border =
+      "1px solid rgba(0,0,0,0.12)";
+    tooltip.style.borderRadius = "10px";
+    tooltip.style.boxShadow =
+      "0 4px 16px rgba(0,0,0,0.12)";
+    tooltip.style.padding = "8px 11px";
+    tooltip.style.minWidth = "145px";
+    tooltip.style.fontSize = "12px";
+    tooltip.style.lineHeight = "1.55";
+    tooltip.style.whiteSpace = "nowrap";
+    tooltip.style.opacity = "0";
+    tooltip.style.transition =
+      "opacity 0.12s ease";
+
+    parent.appendChild(tooltip);
+  }
+
+  canvas._chartTooltip = tooltip;
+
+  /*
+   * ==================================================
+   * 選択Canvasのサイズ調整
+   * ==================================================
+   */
+
+  function resizeOverlay() {
+    const rect =
+      canvas.getBoundingClientRect();
+
+    const dpr =
+      window.devicePixelRatio || 1;
+
+    overlay.width =
+      Math.round(rect.width * dpr);
+
+    overlay.height =
+      Math.round(rect.height * dpr);
+
+    overlay.style.width =
+      rect.width + "px";
+
+    overlay.style.height =
+      rect.height + "px";
+
+    const ctx =
+      overlay.getContext("2d");
+
+    ctx.setTransform(
+      dpr,
+      0,
+      0,
+      dpr,
+      0,
+      0
+    );
+
+    renderSelection();
+  }
+
+  /*
+   * ==================================================
+   * 選択Canvasをクリア
+   * ==================================================
+   */
+
+  function clearSelection() {
+    const ctx =
+      overlay.getContext("2d");
 
     const rect =
       canvas.getBoundingClientRect();
 
-    const chartX =
-      clientX - rect.left;
-
-    const {
-      pad,
-      W,
-      minAge,
-      maxAge
-    } = state.chart;
-
-    // ==================================================
-    // グラフ領域内に制限
-    // ==================================================
-    const clampedX =
-      Math.max(
-        pad.l,
-        Math.min(
-          chartX,
-          pad.l + W
-        )
-      );
-
-    const ratio =
-      (clampedX - pad.l) / W;
-
-    const age =
-      minAge +
-      ratio *
-        (maxAge - minAge);
-
-    // ==================================================
-    // 最も近い年齢を探す
-    // ==================================================
-    let nearestIndex = 0;
-
-    let minDistance =
-      Math.abs(
-        series[0].age - age
-      );
-
-    series.forEach(
-      (point, index) => {
-        const distance =
-          Math.abs(
-            point.age - age
-          );
-
-        if (
-          distance <
-          minDistance
-        ) {
-          minDistance = distance;
-          nearestIndex = index;
-        }
-      }
+    ctx.clearRect(
+      0,
+      0,
+      rect.width,
+      rect.height
     );
-
-    return nearestIndex;
   }
 
-  // ==================================================
-  // 選択ポイントを描画
-  // ==================================================
-  function drawSelectedPoint(index) {
-    const state = canvas._chartState;
+  /*
+   * ==================================================
+   * 選択表示
+   *
+   * ここではグラフ本体を一切描き直さない
+   * ==================================================
+   */
+
+  function renderSelection() {
+    const state =
+      canvas._chartState;
 
     if (!state) {
       return;
     }
 
-    // 元のグラフを再描画
-    draw(
-      state.series,
-      state.target,
-      state.fireAge
-    );
+    const index =
+      canvas._selectedIndex;
+
+    clearSelection();
+
+    if (
+      index === null ||
+      index === undefined ||
+      !state.series[index]
+    ) {
+      return;
+    }
 
     const point =
       state.series[index];
 
-    if (!point) {
-      return;
-    }
-
-    const currentChart =
-      canvas._chartState.chart;
-
     const x =
-      currentChart.xOf(point.age);
+      state.xOf(point.age);
 
     const y =
-      currentChart.yOf(point.assets);
+      state.yOf(point.assets);
 
     const ctx =
-      canvas.getContext("2d");
+      overlay.getContext("2d");
 
-    // ==================================================
-    // 選択ポイントの外側のリング
-    // ==================================================
+    /*
+     * -----------------------------------------------
+     * 縦のガイドライン
+     * -----------------------------------------------
+     */
+
+    ctx.save();
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      x,
+      state.pad.t
+    );
+
+    ctx.lineTo(
+      x,
+      state.pad.t + state.H
+    );
+
+    ctx.strokeStyle =
+      "rgba(0,0,0,0.25)";
+
+    ctx.lineWidth = 1;
+
+    /*
+     * iPhoneで線がぼやけないように
+     */
+    ctx.stroke();
+
+    /*
+     * -----------------------------------------------
+     * 選択ポイントの外側リング
+     * -----------------------------------------------
+     */
+
     ctx.beginPath();
 
     ctx.arc(
       x,
       y,
-      10,
+      9,
       0,
       Math.PI * 2
     );
 
-    ctx.strokeStyle =
-      "rgba(34,34,34,0.35)";
+    ctx.fillStyle =
+      "rgba(255,255,255,0.95)";
+
+    ctx.fill();
+
+    ctx.strokeStyle = "#222";
 
     ctx.lineWidth = 2;
 
     ctx.stroke();
 
-    // ==================================================
-    // 選択ポイント
-    // ==================================================
+    /*
+     * -----------------------------------------------
+     * 選択ポイント本体
+     * -----------------------------------------------
+     */
+
     ctx.beginPath();
 
     ctx.arc(
       x,
       y,
-      5,
+      4.5,
       0,
       Math.PI * 2
     );
@@ -1053,116 +1033,354 @@ function setupChartInteraction(
 
     ctx.fill();
 
-    // ==================================================
-    // FIRE達成地点なら少し強調
-    // ==================================================
-    if (
-      state.fireAge !== undefined &&
-      point.age === state.fireAge
-    ) {
-      ctx.beginPath();
+    ctx.restore();
 
-      ctx.arc(
-        x,
-        y,
-        13,
-        0,
-        Math.PI * 2
-      );
+    /*
+     * -----------------------------------------------
+     * ツールチップ
+     * -----------------------------------------------
+     */
 
-      ctx.strokeStyle =
-        "rgba(34,34,34,0.18)";
-
-      ctx.lineWidth = 2;
-
-      ctx.stroke();
-    }
+    updateTooltip(
+      point,
+      x,
+      y
+    );
   }
 
-  // ==================================================
-  // 振動
-  //
-  // iPhone Safariでは対応していないため
-  // Android等の対応環境のみ実行
-  // ==================================================
-  function hapticFeedback() {
-    if (
-      typeof navigator.vibrate ===
-      "function"
-    ) {
-      navigator.vibrate(8);
-    }
-  }
+  /*
+   * ==================================================
+   * ツールチップ更新
+   * ==================================================
+   */
 
-  // ==================================================
-  // ポイントを選択
-  // ==================================================
-  function selectPoint(
-    index,
-    clientX,
-    clientY,
-    shouldVibrate = false
+  function updateTooltip(
+    point,
+    x,
+    y
   ) {
     const state =
       canvas._chartState;
 
-    if (!state) {
+    if (!state || !tooltip) {
       return;
     }
 
-    const point =
-      state.series[index];
+    const reached =
+      state.fireAge !== undefined &&
+      point.age === state.fireAge;
 
-    if (!point) {
-      return;
-    }
+    tooltip.innerHTML = `
+      <div style="
+        font-weight:700;
+        font-size:13px;
+        margin-bottom:2px;
+      ">
+        ${point.age}歳
+      </div>
 
-    selectedIndex = index;
+      <div>
+        資産：
+        <strong>
+          ${Math.round(point.assets).toLocaleString()}万円
+        </strong>
+      </div>
 
-    // ==================================================
-    // 年齢が変わったときだけ軽い振動
-    // ==================================================
-    if (
-      shouldVibrate &&
-      lastSelectedIndex !== index
-    ) {
-      hapticFeedback();
-    }
+      <div>
+        FIRE目標：
+        ${Math.round(state.target).toLocaleString()}万円
+      </div>
 
-    lastSelectedIndex = index;
+      ${
+        reached
+          ? `
+            <div style="
+              margin-top:3px;
+              font-weight:700;
+            ">
+              🎉 FIRE達成
+            </div>
+          `
+          : ""
+      }
+    `;
 
-    // ==================================================
-    // ポイントを描画
-    // ==================================================
-    drawSelectedPoint(index);
+    /*
+     * -----------------------------------------------
+     * ツールチップ位置
+     *
+     * 指に追従させすぎず、
+     * グラフ上部付近に安定表示
+     * -----------------------------------------------
+     */
 
-    // ==================================================
-    // ツールチップ
-    // ==================================================
-    showTooltip(
-      point,
-      clientX,
-      clientY
+    const parentRect =
+      parent.getBoundingClientRect();
+
+    const canvasRect =
+      canvas.getBoundingClientRect();
+
+    const tooltipWidth =
+      tooltip.offsetWidth || 150;
+
+    const tooltipHeight =
+      tooltip.offsetHeight || 70;
+
+    /*
+     * グラフ上のX座標
+     */
+    let left =
+      canvasRect.left -
+      parentRect.left +
+      x -
+      tooltipWidth / 2;
+
+    /*
+     * 左端からはみ出さない
+     */
+    left = Math.max(
+      6,
+      left
     );
+
+    /*
+     * 右端からはみ出さない
+     */
+    left = Math.min(
+      parentRect.width -
+        tooltipWidth -
+        6,
+      left
+    );
+
+    /*
+     * 基本はポイントより上
+     */
+    let top =
+      canvasRect.top -
+      parentRect.top +
+      y -
+      tooltipHeight -
+      14;
+
+    /*
+     * 上にはみ出す場合は
+     * ポイントの下側
+     */
+    if (top < 6) {
+      top =
+        canvasRect.top -
+        parentRect.top +
+        y +
+        14;
+    }
+
+    tooltip.style.left =
+      Math.round(left) + "px";
+
+    tooltip.style.top =
+      Math.round(top) + "px";
+
+    tooltip.style.opacity = "1";
   }
 
-  // ==================================================
-  // スマホ：指を置いた瞬間
-  // ==================================================
+  /*
+   * ==================================================
+   * ツールチップを閉じる
+   * ==================================================
+   */
+
+  function hideTooltip() {
+    canvas._selectedIndex = null;
+
+    clearSelection();
+
+    if (tooltip) {
+      tooltip.style.opacity = "0";
+    }
+  }
+
+  /*
+   * ==================================================
+   * 指のX座標 → 一番近い年齢
+   * ==================================================
+   */
+
+  function getNearestIndex(clientX) {
+    const state =
+      canvas._chartState;
+
+    const rect =
+      canvas.getBoundingClientRect();
+
+    let x =
+      clientX - rect.left;
+
+    /*
+     * グラフの描画範囲内に限定
+     */
+    x = Math.max(
+      state.pad.l,
+      Math.min(
+        state.pad.l + state.W,
+        x
+      )
+    );
+
+    const ratio =
+      (x - state.pad.l) /
+      state.W;
+
+    const age =
+      state.minAge +
+      ratio *
+        (state.maxAge -
+          state.minAge);
+
+    /*
+     * 年齢単位でスナップ
+     */
+    let nearest = 0;
+    let distance = Infinity;
+
+    state.series.forEach(
+      (point, index) => {
+        const d =
+          Math.abs(
+            point.age - age
+          );
+
+        if (d < distance) {
+          distance = d;
+          nearest = index;
+        }
+      }
+    );
+
+    return nearest;
+  }
+
+  /*
+   * ==================================================
+   * 選択
+   * ==================================================
+   */
+
+  function selectPoint(
+    index,
+    immediate = false
+  ) {
+    const state =
+      canvas._chartState;
+
+    if (!state || !state.series[index]) {
+      return;
+    }
+
+    if (
+      canvas._selectedIndex === index
+    ) {
+      return;
+    }
+
+    canvas._selectedIndex =
+      index;
+
+    /*
+     * 視覚的な「カチッ」を作る
+     */
+    renderSelection();
+
+    /*
+     * Androidなど対応環境では
+     * ごく短い振動
+     *
+     * iPhone Safariでは基本的に
+     * 動作しません。
+     */
+    if (!immediate) {
+      try {
+        if (
+          navigator.vibrate
+        ) {
+          navigator.vibrate(8);
+        }
+      } catch (e) {
+        // 無視
+      }
+    }
+  }
+
+  /*
+   * ==================================================
+   * requestAnimationFrame制御
+   *
+   * pointermoveのたびに重い処理をせず、
+   * 画面更新タイミングに合わせて描画
+   * ==================================================
+   */
+
+  let pendingX = null;
+  let rafId = null;
+
+  function scheduleSelection(
+    clientX
+  ) {
+    pendingX = clientX;
+
+    if (rafId !== null) {
+      return;
+    }
+
+    rafId =
+      requestAnimationFrame(
+        () => {
+          rafId = null;
+
+          if (pendingX === null) {
+            return;
+          }
+
+          const x =
+            pendingX;
+
+          pendingX = null;
+
+          const index =
+            getNearestIndex(x);
+
+          selectPoint(index);
+        }
+      );
+  }
+
+  /*
+   * ==================================================
+   * タッチ開始
+   * ==================================================
+   */
+
   canvas.addEventListener(
     "pointerdown",
-    function (event) {
+    (event) => {
       if (
-        event.pointerType !== "touch"
+        event.pointerType !== "touch" &&
+        event.pointerType !== "pen"
       ) {
         return;
       }
 
-      isTouching = true;
+      event.preventDefault();
 
-      canvas.setPointerCapture(
-        event.pointerId
-      );
+      canvas._isTouching = true;
+
+      try {
+        canvas.setPointerCapture(
+          event.pointerId
+        );
+      } catch (e) {
+        // 無視
+      }
 
       const index =
         getNearestIndex(
@@ -1171,216 +1389,190 @@ function setupChartInteraction(
 
       selectPoint(
         index,
-        event.clientX,
-        event.clientY,
         true
       );
-    }
+    },
+    { passive: false }
   );
 
-  // ==================================================
-  // スマホ：指を左右にスライド
-  // ==================================================
+  /*
+   * ==================================================
+   * 指をスライド
+   *
+   * ここが今回の本丸
+   * ==================================================
+   */
+
   canvas.addEventListener(
     "pointermove",
-    function (event) {
+    (event) => {
       if (
-        event.pointerType !== "touch" ||
-        !isTouching
+        event.pointerType === "touch" ||
+        event.pointerType === "pen"
       ) {
-        return;
-      }
+        if (!canvas._isTouching) {
+          return;
+        }
 
-      const index =
-        getNearestIndex(
+        event.preventDefault();
+
+        scheduleSelection(
           event.clientX
         );
 
-      // 年齢が変わった場合だけ更新
-      if (
-        index !== selectedIndex
-      ) {
-        selectPoint(
-          index,
-          event.clientX,
-          event.clientY,
-          true
-        );
-      } else {
-        // 同じ年齢なら
-        // ツールチップ位置だけ追従
-        const point =
-          canvas._chartState.series[index];
-
-        showTooltip(
-          point,
-          event.clientX,
-          event.clientY
-        );
+        return;
       }
-    }
+
+      /*
+       * PCマウス
+       */
+      scheduleSelection(
+        event.clientX
+      );
+    },
+    { passive: false }
   );
 
-  // ==================================================
-  // スマホ：指を離す
-  // ==================================================
+  /*
+   * ==================================================
+   * 指を離す
+   *
+   * ツールチップは残す
+   * ==================================================
+   */
+
   canvas.addEventListener(
     "pointerup",
-    function (event) {
+    (event) => {
       if (
-        event.pointerType !== "touch"
+        event.pointerType === "touch" ||
+        event.pointerType === "pen"
       ) {
-        return;
-      }
+        canvas._isTouching = false;
 
-      isTouching = false;
-
-      try {
-        canvas.releasePointerCapture(
-          event.pointerId
-        );
-      } catch (e) {
-        // 何もしない
-      }
-    }
-  );
-
-  // ==================================================
-  // スマホ：操作キャンセル
-  // ==================================================
-  canvas.addEventListener(
-    "pointercancel",
-    function (event) {
-      if (
-        event.pointerType !== "touch"
-      ) {
-        return;
-      }
-
-      isTouching = false;
-
-      try {
-        canvas.releasePointerCapture(
-          event.pointerId
-        );
-      } catch (e) {
-        // 何もしない
-      }
-    }
-  );
-
-  // ==================================================
-  // PC：マウスを乗せる
-  // ==================================================
-  canvas.addEventListener(
-    "pointerenter",
-    function (event) {
-      if (
-        event.pointerType !== "mouse"
-      ) {
-        return;
-      }
-
-      isMouseOver = true;
-    }
-  );
-
-  // ==================================================
-  // PC：マウス移動
-  // ==================================================
-  canvas.addEventListener(
-    "pointermove",
-    function (event) {
-      if (
-        event.pointerType !== "mouse"
-      ) {
-        return;
-      }
-
-      isMouseOver = true;
-
-      const index =
-        getNearestIndex(
-          event.clientX
-        );
-
-      selectPoint(
-        index,
-        event.clientX,
-        event.clientY,
-        false
-      );
-    }
-  );
-
-  // ==================================================
-  // PC：マウスがグラフから出る
-  // ==================================================
-  canvas.addEventListener(
-    "pointerleave",
-    function (event) {
-      if (
-        event.pointerType !== "mouse"
-      ) {
-        return;
-      }
-
-      isMouseOver = false;
-
-      hideTooltip();
-
-      const state =
-        canvas._chartState;
-
-      draw(
-        state.series,
-        state.target,
-        state.fireAge
-      );
-    }
-  );
-
-  // ==================================================
-  // グラフ外をタップしたら閉じる
-  // ★今回の重要修正
-  // ==================================================
-  document.addEventListener(
-    "pointerdown",
-    function (event) {
-      // グラフそのものをタップ
-      if (
-        event.target === canvas
-      ) {
-        return;
-      }
-
-      // ツールチップはpointer-events:noneなので
-      // 基本的にはここには来ないが念のため
-      if (
-        event.target === tooltip
-      ) {
-        return;
-      }
-
-      // スマホでグラフ外をタップ
-      if (
-        event.pointerType === "touch"
-      ) {
-        hideTooltip();
-
-        const state =
-          canvas._chartState;
-
-        if (state) {
-          draw(
-            state.series,
-            state.target,
-            state.fireAge
+        try {
+          canvas.releasePointerCapture(
+            event.pointerId
           );
+        } catch (e) {
+          // 無視
         }
       }
     }
   );
+
+  /*
+   * ==================================================
+   * タッチキャンセル
+   * ==================================================
+   */
+
+  canvas.addEventListener(
+    "pointercancel",
+    (event) => {
+      canvas._isTouching = false;
+
+      try {
+        canvas.releasePointerCapture(
+          event.pointerId
+        );
+      } catch (e) {
+        // 無視
+      }
+
+      hideTooltip();
+    }
+  );
+
+  /*
+   * ==================================================
+   * PCマウス
+   * ==================================================
+   */
+
+  canvas.addEventListener(
+    "pointerenter",
+    (event) => {
+      if (
+        event.pointerType === "mouse"
+      ) {
+        canvas._isMouseOver = true;
+      }
+    }
+  );
+
+  canvas.addEventListener(
+    "pointerleave",
+    (event) => {
+      if (
+        event.pointerType === "mouse"
+      ) {
+        canvas._isMouseOver = false;
+        hideTooltip();
+      }
+    }
+  );
+
+  /*
+   * ==================================================
+   * グラフ外をタップ
+   *
+   * これで
+   *
+   * 「グラフ外をタップしたのに
+   *  ツールチップが残る」
+   *
+   * を防ぐ
+   * ==================================================
+   */
+
+  document.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (
+        event.pointerType !== "touch" &&
+        event.pointerType !== "pen"
+      ) {
+        return;
+      }
+
+      if (
+        event.target === canvas ||
+        canvas.contains(event.target) ||
+        event.target === overlay ||
+        overlay.contains(event.target) ||
+        event.target === tooltip ||
+        tooltip.contains(event.target)
+      ) {
+        return;
+      }
+
+      hideTooltip();
+    },
+    { passive: true }
+  );
+
+  /*
+   * ==================================================
+   * 初期化
+   * ==================================================
+   */
+
+  resizeOverlay();
+
+  /*
+   * Canvasサイズ変更時
+   */
+  if (!canvas._resizeObserver) {
+    canvas._resizeObserver =
+      new ResizeObserver(() => {
+        resizeOverlay();
+      });
+
+    canvas._resizeObserver.observe(
+      canvas
+    );
+  }
 }
 
 // ==================================================
