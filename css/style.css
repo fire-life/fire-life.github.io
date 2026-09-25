@@ -390,4 +390,24 @@ canvas {
     canvas {
         height: 380px;
     }
+    
+    /* =========================================
+    FIREグラフ：スマホ操作
+    横スライドをグラフ操作として優先
+    ========================================= */
+
+    #chart {
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    }
+
+    /* 選択用レイヤー */
+    .chart-selection-overlay {
+    touch-action: none;
+    pointer-events: none;
+    -webkit-user-select: none;
+    user-select: none;
+    }
 }

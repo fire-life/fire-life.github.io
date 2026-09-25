@@ -1355,14 +1355,37 @@ function setupChartInteraction(
   }
 
   /*
-   * ==================================================
-   * タッチ開始
-   * ==================================================
-   */
+  * ==================================================
+  * タッチ操作
+  *
+  * ・横方向 → グラフ操作
+  * ・縦方向 → ページスクロール
+  * ・横方向に確定したら、その後はグラフ操作を優先
+  * ==================================================
+  */
+
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  let touchMode = null;
+  // null
+  // "pending"
+  // "chart"
+  // "scroll"
+
+  let lastTouchX = null;
+
+
+  /*
+  * --------------------------------------------------
+  * 指を置いた瞬間
+  * --------------------------------------------------
+  */
 
   canvas.addEventListener(
     "pointerdown",
     (event) => {
+
       if (
         event.pointerType !== "touch" &&
         event.pointerType !== "pen"
@@ -1370,7 +1393,12 @@ function setupChartInteraction(
         return;
       }
 
-      event.preventDefault();
+      touchStartX = event.clientX;
+      touchStartY = event.clientY;
+
+      lastTouchX = event.clientX;
+
+      touchMode = "pending";
 
       canvas._isTouching = true;
 
@@ -1382,6 +1410,9 @@ function setupChartInteraction(
         // 無視
       }
 
+      /*
+      * 最初のポイントは即座に表示
+      */
       const index =
         getNearestIndex(
           event.clientX
@@ -1391,31 +1422,38 @@ function setupChartInteraction(
         index,
         true
       );
+
+      /*
+      * ここでは preventDefault しない
+      *
+      * まだ
+      * 「横操作なのか縦スクロールなのか」
+      * 分からないため
+      */
     },
-    { passive: false }
+    {
+      passive: false
+    }
   );
 
+
   /*
-   * ==================================================
-   * 指をスライド
-   *
-   * ここが今回の本丸
-   * ==================================================
+   * --------------------------------------------------
+   * 指を動かす
+   * --------------------------------------------------
    */
 
   canvas.addEventListener(
     "pointermove",
     (event) => {
+
       if (
-        event.pointerType === "touch" ||
-        event.pointerType === "pen"
+        event.pointerType !== "touch" &&
+        event.pointerType !== "pen"
       ) {
-        if (!canvas._isTouching) {
-          return;
-        }
-
-        event.preventDefault();
-
+        /*
+        * PCマウス
+        */
         scheduleSelection(
           event.clientX
         );
@@ -1423,32 +1461,134 @@ function setupChartInteraction(
         return;
       }
 
+      if (!canvas._isTouching) {
+        return;
+      }
+
+      const dx =
+        event.clientX -
+        touchStartX;
+
+      const dy =
+        event.clientY -
+        touchStartY;
+
+      const absX = Math.abs(dx);
+      const absY = Math.abs(dy);
+
       /*
-       * PCマウス
-       */
-      scheduleSelection(
-        event.clientX
-      );
+      * ----------------------------------------------
+      * まだ方向が決まっていない
+      * ----------------------------------------------
+      */
+
+      if (touchMode === "pending") {
+
+        /*
+        * 小さな指ブレは無視
+        */
+        if (
+          absX < 6 &&
+          absY < 6
+        ) {
+          return;
+        }
+
+        /*
+        * 横方向の動きが明らかに大きい
+        */
+        if (absX > absY * 1.15) {
+
+          touchMode = "chart";
+
+        }
+        /*
+        * 縦方向の動きが明らかに大きい
+        */
+        else if (absY > absX * 1.15) {
+
+          touchMode = "scroll";
+
+          /*
+          * グラフ操作を終了
+          */
+          hideTooltip();
+
+          return;
+        }
+
+        /*
+        * まだ判定できない
+        */
+        else {
+          return;
+        }
+      }
+
+
+      /*
+      * ----------------------------------------------
+      * 縦スクロール
+      * ----------------------------------------------
+      */
+
+      if (touchMode === "scroll") {
+        return;
+      }
+
+
+      /*
+      * ----------------------------------------------
+      * グラフ操作
+      * ----------------------------------------------
+      */
+
+      if (touchMode === "chart") {
+
+        /*
+        * Safariに
+        *
+        * 「これはグラフ操作です」
+        *
+        * と伝える
+        */
+        event.preventDefault();
+
+        lastTouchX =
+          event.clientX;
+
+        scheduleSelection(
+          event.clientX
+        );
+      }
+
     },
-    { passive: false }
+    {
+      passive: false
+    }
   );
 
+
   /*
-   * ==================================================
+   * --------------------------------------------------
    * 指を離す
-   *
-   * ツールチップは残す
-   * ==================================================
+   * --------------------------------------------------
    */
 
   canvas.addEventListener(
     "pointerup",
     (event) => {
+
       if (
         event.pointerType === "touch" ||
         event.pointerType === "pen"
       ) {
+
         canvas._isTouching = false;
+
+        touchMode = null;
+
+        lastTouchX = null;
 
         try {
           canvas.releasePointerCapture(
@@ -1461,6 +1601,7 @@ function setupChartInteraction(
     }
   );
 
+
   /*
    * ==================================================
    * タッチキャンセル
@@ -1470,7 +1611,12 @@ function setupChartInteraction(
   canvas.addEventListener(
     "pointercancel",
     (event) => {
+
       canvas._isTouching = false;
+
+      touchMode = null;
+
+      lastTouchX = null;
 
       try {
         canvas.releasePointerCapture(
