@@ -1503,21 +1503,6 @@ function setupChartInteraction(
 
         }
         /*
-        * 縦方向の動きが明らかに大きい
-        */
-        else if (absY > absX * 1.15) {
-
-          touchMode = "scroll";
-
-          /*
-          * グラフ操作を終了
-          */
-          hideTooltip();
-
-          return;
-        }
-
-        /*
         * まだ判定できない
         */
         else {
