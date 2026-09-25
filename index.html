@@ -34,53 +34,233 @@
 
 <body>
   <h1>FIRE達成時期シミュレーター</h1>
-  <p class="note">MVP版：現在資産・積立・利回り・生活費から、FIRE目標額と到達年齢を概算します。</p>
+
+  <p class="lead">
+    <span class="mvp-badge">MVP版</span>
+    現在の資産・積立額・生活費などを入力すると、<br>
+    FIREに必要な資産と達成時期をシミュレーションできます。
+  </p>
 
   <div class="card">
     <details id="conditionPanel" open>
-    <summary>条件入力</summary>
-    <p class="note">※初期値は入力例です。ご自身の状況に変更してください。</p>
 
-    <div class="grid">
+      <summary>
+        <span>条件を入力する</span>
+      </summary>
 
-      <label>
-        現在年齢
-        <input id="age" type="number" min="18" max="79" step="1" value="30">
-      </label>
+      <p class="note">
+        わかる範囲で入力してください。初期値は入力例です。
+      </p>
 
-      <label>
-        現在の資産（万円）
-        <input id="assets" type="number" min="0" step="1" value="300">
-      </label>
 
-      <label>
-        毎月の積立額（万円）
-        <input id="monthly" type="number" min="0" step="0.1" value="3">
-      </label>
+      <!-- ====================
+           現在の状況
+      ==================== -->
 
-      <label>
-        想定年利（%）
-        <input id="return" type="number" min="0" max="20" step="0.1" value="5">
-      </label>
+      <div class="input-section">
 
-      <label>
-        年間生活費（万円）
-        <input id="spend" type="number" min="0" step="1" value="240">
-      </label>
+        <h3>① 現在の状況</h3>
 
-      <label>
-        FIRE後の年間収入（万円）
-        <input id="income" type="number" min="0" step="1" value="0">
-      </label>
+        <div class="grid">
 
-    </div>
+          <div class="field">
+            <label for="age">
+              現在年齢
+            </label>
 
-    <button onclick="simulate(true)">
-      シミュレーションする
-    </button>
+            <input
+              id="age"
+              type="number"
+              min="18"
+              max="79"
+              step="1"
+              value="30"
+              inputmode="numeric"
+              aria-describedby="age-help"
+            >
 
-  </details>
-</div>
+            <div class="input-help" id="age-help">
+              例：30
+            </div>
+          </div>
+
+
+          <div class="field">
+            <label for="assets">
+              現在の資産
+            </label>
+
+            <div class="input-with-unit">
+              <input
+                id="assets"
+                type="number"
+                min="0"
+                step="1"
+                value="300"
+                inputmode="numeric"
+                aria-describedby="assets-help"
+              >
+              <span>万円</span>
+            </div>
+
+            <div class="input-help" id="assets-help">
+              現在保有している金融資産の合計
+            </div>
+          </div>
+
+
+          <div class="field">
+            <label for="monthly">
+              毎月の積立額
+            </label>
+
+            <div class="input-with-unit">
+              <input
+                id="monthly"
+                type="number"
+                min="0"
+                step="0.1"
+                value="3"
+                inputmode="decimal"
+                aria-describedby="monthly-help"
+              >
+              <span>万円</span>
+            </div>
+
+            <div class="input-help" id="monthly-help">
+              毎月投資に回す金額
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+
+      <!-- ====================
+           FIREの条件
+      ==================== -->
+
+      <div class="input-section">
+
+        <h3>② FIREの条件</h3>
+
+        <div class="grid">
+
+          <div class="field">
+            <label for="spend">
+              年間生活費
+            </label>
+
+            <div class="input-with-unit">
+              <input
+                id="spend"
+                type="number"
+                min="0"
+                step="1"
+                value="240"
+                inputmode="numeric"
+                aria-describedby="spend-help"
+              >
+              <span>万円</span>
+            </div>
+
+            <div class="input-help" id="spend-help">
+              FIRE後に1年間で使う生活費
+            </div>
+          </div>
+
+
+          <div class="field">
+            <label for="income">
+              FIRE後の年間収入
+            </label>
+
+            <div class="input-with-unit">
+              <input
+                id="income"
+                type="number"
+                min="0"
+                step="1"
+                value="0"
+                inputmode="numeric"
+                aria-describedby="income-help"
+              >
+              <span>万円</span>
+            </div>
+
+            <div class="input-help" id="income-help">
+              副業・パートなどのFIRE後の収入。完全FIREなら0万円
+            </div>
+          </div>
+
+        </div>
+
+        <div class="tip">
+          💡 <strong>サイドFIREの場合</strong><br>
+          FIRE後も年間100万円働いて稼ぐなら「100」と入力してください。
+        </div>
+
+      </div>
+
+
+      <!-- ====================
+           運用条件
+      ==================== -->
+
+      <div class="input-section">
+
+        <h3>③ 運用条件</h3>
+
+        <div class="grid">
+
+          <div class="field">
+            <label for="return">
+              想定年利
+            </label>
+
+            <div class="input-with-unit">
+              <input
+                id="return"
+                type="number"
+                min="0"
+                max="20"
+                step="0.1"
+                value="5"
+                inputmode="decimal"
+                aria-describedby="return-help"
+              >
+              <span>%</span>
+            </div>
+
+            <div class="input-help" id="return-help">
+              投資資産の平均的な年間リターン
+            </div>
+          </div>
+
+        </div>
+
+        <div class="tip">
+          💡 迷った場合は<strong>5%</strong>を目安として入力できます。
+        </div>
+
+      </div>
+
+
+      <button
+        class="simulate-button"
+        type="button"
+        onclick="simulate(true)"
+      >
+        シミュレーションする
+      </button>
+
+    </details>
+  </div>
+
+
+  <!-- ====================
+       結果
+  ==================== -->
 
   <div class="card" id="results">
     <h2>結果</h2>
@@ -88,20 +268,39 @@
     <div id="table"></div>
   </div>
 
-<div class="card">
-  <h2>資産推移</h2>
-  <div class="chart-wrap">
-    <canvas id="chart"></canvas>
+
+  <!-- ====================
+       グラフ
+  ==================== -->
+
+  <div class="card">
+
+    <h2>資産推移</h2>
+
+    <div class="chart-wrap">
+      <canvas id="chart"></canvas>
+    </div>
+
+    <p class="chart-note">
+      ※ グラフは4%取り崩し率を基準に表示しています。
+    </p>
+
   </div>
 
-  <p class="chart-note">
-    ※ グラフは4%取り崩し率を基準に表示しています。
-  </p>
-</div>
+
+  <!-- ====================
+       注意事項
+  ==================== -->
 
   <div class="card warn">
     <strong>注意</strong><br>
-    これは一定の年利で運用し、毎月一定額を積み立てる単純モデルです。実際の市場ではリターンが年ごとに変動し、税金・インフレ・手数料・社会保障・住宅ローン・教育費なども結果に影響します。また、3%・3.5%・4%は「安全を保証する率」ではありません。特にFIREは30年以上の運用期間になる可能性があるため、複数の取り崩し率を比較する設計にしています。
+
+    これは一定の年利で運用し、毎月一定額を積み立てる単純モデルです。
+    実際の市場ではリターンが年ごとに変動し、税金・インフレ・手数料・社会保障・住宅ローン・教育費なども結果に影響します。
+
+    また、3%・3.5%・4%は「安全を保証する率」ではありません。
+    特にFIREは30年以上の運用期間になる可能性があるため、複数の取り崩し率を比較する設計にしています。
+
   </div>
 </body>
 

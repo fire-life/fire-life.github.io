@@ -9,7 +9,7 @@ body {
 }
 
 h1 {
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     line-height: 1.4;
 }
 
@@ -20,16 +20,35 @@ h2 {
 }
 
 h3 {
-    margin-top: 24px;
+    margin: 0 0 14px;
+    font-size: 17px;
 }
 
 p {
     margin: 12px 0;
 }
 
+.lead {
+    color: #555;
+    margin-top: 0;
+    margin-bottom: 24px;
+}
+
 .note {
     color: #666;
     font-size: 14px;
+}
+
+.mvp-badge {
+    display: inline-block;
+    margin-right: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #f1f3f5;
+    color: #666;
+    font-size: 12px;
+    font-weight: 600;
+    vertical-align: 2px;
 }
 
 /* ====================
@@ -44,35 +63,34 @@ p {
     box-shadow: 0 2px 10px #0000000d;
 }
 
-/* ====================
-   重要ポイント
-==================== */
-
-.highlight {
-    background: #f1f5f9;
-    border-left: 4px solid #222;
-    border-radius: 8px;
-    padding: 16px 18px;
-    margin: 20px 0;
-}
-
-.highlight strong {
-    font-size: 1.1rem;
-}
 
 /* ====================
-   リンク
+   入力セクション
 ==================== */
 
-a {
-    color: #2563eb;
-    font-weight: 600;
-    text-decoration: none;
+.input-section {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid #eee;
 }
 
-a:hover {
-    text-decoration: underline;
+.input-section:first-of-type {
+    border-top: 0;
+    padding-top: 8px;
 }
+
+
+/* ====================
+   details
+==================== */
+
+#conditionPanel summary {
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 19px;
+    padding: 4px 0;
+}
+
 
 /* ====================
    グリッド
@@ -80,56 +98,140 @@ a:hover {
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
 }
+
 
 /* ====================
-   入力フォーム
+   フィールド
 ==================== */
 
-label {
-    font-size: 14px;
-    color: #555;
+.field {
+    min-width: 0;
 }
+
+label {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+}
+
+
+/* ====================
+   入力欄
+==================== */
 
 input {
     width: 100%;
     box-sizing: border-box;
-    padding: 10px;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
+    padding: 12px 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
     font-size: 16px;
+    background: #fff;
+    color: #222;
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
 }
 
-#conditionPanel summary {
-    cursor: pointer;
-    font-weight: 600;
-    padding: 8px 0;
+input:focus {
+    outline: none;
+    border-color: #64748b;
+    box-shadow: 0 0 0 3px #64748b1a;
 }
+
+input[aria-invalid="true"] {
+    border-color: #e11d48;
+    background: #fff7f8;
+}
+
+
+/* ====================
+   単位付き入力
+==================== */
+
+.input-with-unit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.input-with-unit input {
+    flex: 1;
+    min-width: 0;
+}
+
+.input-with-unit span {
+    flex: 0 0 auto;
+    color: #555;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+
+/* ====================
+   入力補足
+==================== */
+
+.input-help {
+    margin-top: 5px;
+    color: #777;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+/* ====================
+   ヒント
+==================== */
+
+.tip {
+    margin-top: 18px;
+    padding: 12px 14px;
+    background: #f8fafc;
+    border-radius: 8px;
+    color: #555;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
 
 /* ====================
    ボタン
 ==================== */
 
-button {
-    padding: 12px 20px;
+.simulate-button {
+    display: block;
+    width: 100%;
+    padding: 14px 20px;
+    margin-top: 28px;
     border: 0;
-    border-radius: 9px;
+    border-radius: 10px;
     background: #222;
     color: #fff;
-    font-size: 16px;
+    font-size: 17px;
+    font-weight: 700;
     cursor: pointer;
-    margin-top: 16px;
+    transition:
+        opacity 0.15s,
+        transform 0.05s;
 }
 
-button:hover {
+.simulate-button:hover {
     opacity: 0.85;
 }
 
+.simulate-button:active {
+    transform: translateY(1px);
+}
+
+
 /* ====================
-   シミュレーター結果
+   結果
 ==================== */
 
 .results {
@@ -148,6 +250,7 @@ button:hover {
     font-size: 24px;
     font-weight: 700;
 }
+
 
 /* ====================
    表
@@ -177,6 +280,7 @@ td:first-child {
     text-align: left;
 }
 
+
 /* ====================
    グラフ
 ==================== */
@@ -201,6 +305,7 @@ canvas {
     color: #666;
 }
 
+
 /* ====================
    注意事項
 ==================== */
@@ -211,6 +316,7 @@ canvas {
     line-height: 1.7;
     background: #fafafa;
 }
+
 
 /* ====================
    スマホ
@@ -231,9 +337,41 @@ canvas {
         font-size: 1.35rem;
     }
 
+    h3 {
+        font-size: 16px;
+    }
+
     .card {
         padding: 18px;
         margin: 14px 0;
+    }
+
+    .lead {
+        font-size: 14px;
+    }
+
+    /*
+       スマホでは1列にして
+       入力項目を上から順番に入力できるようにする
+    */
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .input-section {
+        margin-top: 24px;
+        padding-top: 20px;
+    }
+
+    input {
+        padding: 13px;
+        font-size: 16px;
+    }
+
+    .simulate-button {
+        padding: 15px 20px;
+        font-size: 17px;
     }
 
     .results {
@@ -249,7 +387,6 @@ canvas {
         padding: 8px;
     }
 
-    /* グラフをスマホでは少し縦長にする */
     canvas {
         height: 380px;
     }
