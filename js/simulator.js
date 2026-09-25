@@ -402,7 +402,6 @@ function draw(series, target, fireAge) {
   c.width = Math.round(rect.width * dpr);
   c.height = Math.round(rect.height * dpr);
 
-  // 高解像度ディスプレイでも文字・線をくっきり表示
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, rect.width, rect.height);
 
@@ -411,7 +410,6 @@ function draw(series, target, fireAge) {
 
   // ==================================================
   // グラフの余白
-  // スマホでは左右の余白を少し狭くする
   // ==================================================
   const pad = {
     l: width < 500 ? 62 : 76,
@@ -467,6 +465,10 @@ function draw(series, target, fireAge) {
   // Y座標
   // ==================================================
   function yOf(value) {
+    if (max === 0) {
+      return pad.t + H;
+    }
+
     return pad.t + H - (value / max) * H;
   }
 
@@ -500,12 +502,12 @@ function draw(series, target, fireAge) {
 
   // ==================================================
   // FIRE目標ライン
+  // ラベルは常時表示しない
   // ==================================================
   const targetY = yOf(target);
 
   ctx.save();
 
-  // 点線
   ctx.setLineDash([7, 5]);
   ctx.strokeStyle = "#777";
   ctx.lineWidth = 2;
@@ -516,53 +518,6 @@ function draw(series, target, fireAge) {
   ctx.stroke();
 
   ctx.restore();
-
-  // ==================================================
-  // FIRE目標ラベル
-  // 線の上に白背景を付ける
-  // ==================================================
-  const targetText =
-    "FIRE目標 " + formatAxisMoney(target);
-
-  ctx.font = "bold 12px system-ui, sans-serif";
-
-  const targetTextWidth =
-    ctx.measureText(targetText).width;
-
-  const labelWidth = targetTextWidth + 14;
-  const labelHeight = 24;
-
-  let labelX = pad.l + 8;
-  let labelY = targetY - labelHeight - 3;
-
-  // 上にはみ出す場合は線の下へ
-  if (labelY < pad.t) {
-    labelY = targetY + 5;
-  }
-
-  // 白背景
-  ctx.fillStyle = "rgba(255,255,255,0.94)";
-
-  ctx.beginPath();
-  ctx.roundRect(
-    labelX,
-    labelY,
-    labelWidth,
-    labelHeight,
-    6
-  );
-  ctx.fill();
-
-  // 文字
-  ctx.fillStyle = "#444";
-  ctx.textAlign = "left";
-  ctx.textBaseline = "middle";
-
-  ctx.fillText(
-    targetText,
-    labelX + 7,
-    labelY + labelHeight / 2
-  );
 
   // ==================================================
   // 資産推移
@@ -607,6 +562,7 @@ function draw(series, target, fireAge) {
 
   // ==================================================
   // FIRE達成地点
+  // ラベルは常時表示しない
   // ==================================================
   if (fireAge !== undefined) {
     const firePoint = series.find(
@@ -617,7 +573,6 @@ function draw(series, target, fireAge) {
       const x = xOf(firePoint.age);
       const y = yOf(firePoint.assets);
 
-      // 達成地点の丸
       ctx.beginPath();
 
       ctx.arc(
@@ -630,93 +585,6 @@ function draw(series, target, fireAge) {
 
       ctx.fillStyle = "#222";
       ctx.fill();
-
-      // ------------------------------
-      // ラベル
-      // ------------------------------
-      const fireText =
-        "FIRE達成 " + fireAge + "歳";
-
-      ctx.font = "bold 12px system-ui, sans-serif";
-
-      const fireTextWidth =
-        ctx.measureText(fireText).width;
-
-      const fireLabelWidth =
-        fireTextWidth + 12;
-
-      const fireLabelHeight = 22;
-
-      // 基本位置
-      let textX = x;
-      let textAlign = "center";
-
-      // 左端に近い場合
-      if (
-        x <
-        pad.l + fireLabelWidth / 2
-      ) {
-        textX = x + 8;
-        textAlign = "left";
-      }
-
-      // 右端に近い場合
-      else if (
-        x >
-        pad.l + W - fireLabelWidth / 2
-      ) {
-        textX = x - 8;
-        textAlign = "right";
-      }
-
-      let textY = y - 18;
-
-      // 上にはみ出す場合は下側へ
-      if (textY < pad.t + 12) {
-        textY = y + 20;
-      }
-
-      // 背景のX座標
-      let bgX;
-
-      if (textAlign === "center") {
-        bgX =
-          textX -
-          fireLabelWidth / 2;
-      } else if (textAlign === "left") {
-        bgX = textX - 4;
-      } else {
-        bgX =
-          textX -
-          fireLabelWidth +
-          4;
-      }
-
-      // 白背景
-      ctx.fillStyle = "rgba(255,255,255,0.94)";
-
-      ctx.beginPath();
-
-      ctx.roundRect(
-        bgX,
-        textY - 11,
-        fireLabelWidth,
-        fireLabelHeight,
-        6
-      );
-
-      ctx.fill();
-
-      // 文字
-      ctx.fillStyle = "#222";
-      ctx.textAlign = textAlign;
-      ctx.textBaseline = "middle";
-
-      ctx.fillText(
-        fireText,
-        textX,
-        textY
-      );
     }
   }
 
@@ -728,6 +596,7 @@ function draw(series, target, fireAge) {
   ctx.textBaseline = "top";
 
   ctx.textAlign = "left";
+
   ctx.fillText(
     "資産（万円）",
     8,
@@ -736,7 +605,6 @@ function draw(series, target, fireAge) {
 
   // ==================================================
   // X軸（年齢）
-  // スマホでは3点表示
   // ==================================================
   ctx.textAlign = "center";
 
@@ -750,11 +618,17 @@ function draw(series, target, fireAge) {
       pad.t + H + 13
     );
 
-    ctx.fillText(
-      middleAge + "歳",
-      xOf(middleAge),
-      pad.t + H + 13
-    );
+    // 同じ年齢が重複する場合は表示しない
+    if (
+      middleAge !== minAge &&
+      middleAge !== maxAge
+    ) {
+      ctx.fillText(
+        middleAge + "歳",
+        xOf(middleAge),
+        pad.t + H + 13
+      );
+    }
 
     ctx.fillText(
       maxAge + "歳",
@@ -774,6 +648,448 @@ function draw(series, target, fireAge) {
       pad.t + H + 13
     );
   }
+
+  // ==================================================
+  // グラフ操作をセットアップ
+  // ==================================================
+  setupChartInteraction(
+    c,
+    series,
+    target,
+    fireAge,
+    {
+      pad,
+      W,
+      H,
+      minAge,
+      maxAge,
+      xOf,
+      yOf,
+      formatAxisMoney
+    }
+  );
+}
+
+/* =========================
+   グラフ操作・ツールチップ
+========================= */
+
+function setupChartInteraction(
+  canvas,
+  series,
+  target,
+  fireAge,
+  chart
+) {
+  // --------------------------------------------------
+  // 同じcanvasに何度もイベントを登録しない
+  // --------------------------------------------------
+  if (canvas.dataset.interactionReady === "true") {
+    canvas._chartState = {
+      series,
+      target,
+      fireAge,
+      chart
+    };
+
+    return;
+  }
+
+  canvas.dataset.interactionReady = "true";
+
+  canvas.style.touchAction = "none";
+  canvas.style.cursor = "crosshair";
+
+  canvas._chartState = {
+    series,
+    target,
+    fireAge,
+    chart
+  };
+
+  // --------------------------------------------------
+  // canvasの親要素
+  // --------------------------------------------------
+  const wrapper = canvas.parentElement;
+
+  // --------------------------------------------------
+  // ツールチップを作成
+  // --------------------------------------------------
+  const tooltip = document.createElement("div");
+
+  tooltip.style.position = "absolute";
+  tooltip.style.display = "none";
+  tooltip.style.zIndex = "20";
+  tooltip.style.pointerEvents = "none";
+
+  tooltip.style.background = "rgba(255,255,255,0.97)";
+  tooltip.style.border = "1px solid #ddd";
+  tooltip.style.borderRadius = "10px";
+  tooltip.style.padding = "10px 12px";
+  tooltip.style.boxShadow =
+    "0 4px 14px rgba(0,0,0,0.12)";
+
+  tooltip.style.fontSize = "13px";
+  tooltip.style.lineHeight = "1.5";
+  tooltip.style.color = "#222";
+
+  tooltip.style.minWidth = "145px";
+
+  wrapper.style.position = "relative";
+  wrapper.appendChild(tooltip);
+
+  // --------------------------------------------------
+  // ツールチップ表示
+  // --------------------------------------------------
+  function showTooltip(point, screenX, screenY) {
+    const state = canvas._chartState;
+
+    if (!state) {
+      return;
+    }
+
+    const targetValue = state.target;
+    const fireAgeValue = state.fireAge;
+
+    const reached =
+      fireAgeValue !== undefined &&
+      point.age >= fireAgeValue &&
+      point.assets >= targetValue;
+
+    let html = "";
+
+    html += `
+      <div style="
+        font-weight:700;
+        font-size:15px;
+        margin-bottom:4px;
+      ">
+        ${point.age}歳
+      </div>
+    `;
+
+    html += `
+      <div>
+        資産：
+        <strong>
+          ${Math.round(point.assets).toLocaleString()}万円
+        </strong>
+      </div>
+    `;
+
+    html += `
+      <div>
+        FIRE目標：
+        <strong>
+          ${Math.round(targetValue).toLocaleString()}万円
+        </strong>
+      </div>
+    `;
+
+    if (reached) {
+      html += `
+        <div style="
+          margin-top:4px;
+          font-weight:700;
+        ">
+          🎉 FIRE達成
+        </div>
+      `;
+    }
+
+    tooltip.innerHTML = html;
+
+    // 一旦表示してサイズを取得
+    tooltip.style.display = "block";
+
+    const wrapperRect =
+      wrapper.getBoundingClientRect();
+
+    const tooltipWidth =
+      tooltip.offsetWidth;
+
+    const tooltipHeight =
+      tooltip.offsetHeight;
+
+    // ------------------------------------------------
+    // 基本位置
+    // タップ位置の少し上
+    // ------------------------------------------------
+    let left =
+      screenX - wrapperRect.left -
+      tooltipWidth / 2;
+
+    let top =
+      screenY - wrapperRect.top -
+      tooltipHeight - 14;
+
+    // ------------------------------------------------
+    // 左右にはみ出さない
+    // ------------------------------------------------
+    const margin = 8;
+
+    left = Math.max(
+      margin,
+      Math.min(
+        left,
+        wrapperRect.width -
+          tooltipWidth -
+          margin
+      )
+    );
+
+    // ------------------------------------------------
+    // 上にはみ出したら下側へ
+    // ------------------------------------------------
+    if (top < margin) {
+      top =
+        screenY - wrapperRect.top + 14;
+    }
+
+    // ------------------------------------------------
+    // 下にもはみ出さない
+    // ------------------------------------------------
+    top = Math.min(
+      top,
+      wrapperRect.height -
+        tooltipHeight -
+        margin
+    );
+
+    tooltip.style.left =
+      Math.round(left) + "px";
+
+    tooltip.style.top =
+      Math.round(top) + "px";
+  }
+
+  // --------------------------------------------------
+  // ツールチップを消す
+  // --------------------------------------------------
+  function hideTooltip() {
+    tooltip.style.display = "none";
+  }
+
+  // --------------------------------------------------
+  // キャンバス上の座標から最も近い年齢を取得
+  // --------------------------------------------------
+  function getNearestPoint(clientX) {
+    const state = canvas._chartState;
+
+    const rect =
+      canvas.getBoundingClientRect();
+
+    const chartX =
+      clientX - rect.left;
+
+    const {
+      pad,
+      W,
+      minAge,
+      maxAge
+    } = state.chart;
+
+    // グラフ領域外なら端に丸める
+    const clampedX =
+      Math.max(
+        pad.l,
+        Math.min(
+          chartX,
+          pad.l + W
+        )
+      );
+
+    const ratio =
+      (clampedX - pad.l) / W;
+
+    const age =
+      minAge +
+      ratio * (maxAge - minAge);
+
+    // 最も近い年齢を探す
+    let nearest = series[0];
+    let minDistance =
+      Math.abs(series[0].age - age);
+
+    series.forEach((point) => {
+      const distance =
+        Math.abs(point.age - age);
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearest = point;
+      }
+    });
+
+    return nearest;
+  }
+
+  // --------------------------------------------------
+  // 選択ポイントをグラフ上に強調
+  // --------------------------------------------------
+  function drawSelectedPoint(point) {
+    const state = canvas._chartState;
+
+    // 現在のグラフを再描画
+    draw(
+      state.series,
+      state.target,
+      state.fireAge
+    );
+
+    // draw()の中で状態が維持されるので
+    // 現在の描画情報を取得
+    const chart = canvas._chartState.chart;
+
+    const x =
+      chart.xOf(point.age);
+
+    const y =
+      chart.yOf(point.assets);
+
+    const ctx =
+      canvas.getContext("2d");
+
+    // 選択ポイントの外側に円を表示
+    ctx.beginPath();
+
+    ctx.arc(
+      x,
+      y,
+      10,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.strokeStyle = "#222";
+    ctx.lineWidth = 2;
+
+    ctx.stroke();
+
+    // 中央の点
+    ctx.beginPath();
+
+    ctx.arc(
+      x,
+      y,
+      5,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fillStyle = "#222";
+    ctx.fill();
+  }
+
+  // --------------------------------------------------
+  // 振動
+  // --------------------------------------------------
+  function vibrate() {
+    if (
+      typeof navigator.vibrate ===
+      "function"
+    ) {
+      navigator.vibrate(8);
+    }
+  }
+
+  // ==================================================
+  // スマホ・タブレット：タップ
+  // ==================================================
+  canvas.addEventListener(
+    "pointerup",
+    function (event) {
+      if (
+        event.pointerType !== "touch"
+      ) {
+        return;
+      }
+
+      const point =
+        getNearestPoint(event.clientX);
+
+      drawSelectedPoint(point);
+
+      showTooltip(
+        point,
+        event.clientX,
+        event.clientY
+      );
+
+      vibrate();
+    }
+  );
+
+  // ==================================================
+  // PC：マウスを動かす
+  // ==================================================
+  canvas.addEventListener(
+    "pointermove",
+    function (event) {
+      if (
+        event.pointerType !== "mouse"
+      ) {
+        return;
+      }
+
+      const point =
+        getNearestPoint(event.clientX);
+
+      showTooltip(
+        point,
+        event.clientX,
+        event.clientY
+      );
+
+      drawSelectedPoint(point);
+    }
+  );
+
+  // --------------------------------------------------
+  // PC：グラフからマウスが離れたら消す
+  // --------------------------------------------------
+  canvas.addEventListener(
+    "pointerleave",
+    function (event) {
+      if (
+        event.pointerType !== "mouse"
+      ) {
+        return;
+      }
+
+      hideTooltip();
+
+      const state =
+        canvas._chartState;
+
+      draw(
+        state.series,
+        state.target,
+        state.fireAge
+      );
+    }
+  );
+
+  // --------------------------------------------------
+  // スマホ：もう一度タップしたら消す
+  // --------------------------------------------------
+  canvas.addEventListener(
+    "pointerdown",
+    function (event) {
+      if (
+        event.pointerType !== "touch"
+      ) {
+        return;
+      }
+
+      // 既に表示中なら一旦消す
+      if (
+        tooltip.style.display === "block"
+      ) {
+        hideTooltip();
+      }
+    }
+  );
 }
 
 // ==================================================
