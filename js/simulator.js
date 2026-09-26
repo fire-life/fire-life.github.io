@@ -1795,4 +1795,53 @@ numberInputs.forEach((input) => {
   });
 });
 
+// ====================
+// 想定年利プリセット
+// ====================
+
+const returnInput = document.getElementById("return");
+const returnPresets = document.querySelectorAll(".return-preset");
+
+returnPresets.forEach((button) => {
+  button.addEventListener("click", () => {
+    const value = button.dataset.value;
+
+    if (!returnInput) {
+      return;
+    }
+
+    returnInput.value = value;
+
+    returnPresets.forEach((btn) => {
+      btn.classList.remove("is-selected");
+    });
+
+    button.classList.add("is-selected");
+
+    returnInput.dispatchEvent(
+      new Event("input", { bubbles: true })
+    );
+
+    returnInput.focus();
+  });
+});
+
+if (returnInput) {
+  returnInput.addEventListener("input", () => {
+    const selectedButton = document.querySelector(
+      '.return-preset.is-selected'
+    );
+
+    if (!selectedButton) {
+      return;
+    }
+
+    if (returnInput.value !== selectedButton.dataset.value) {
+      returnPresets.forEach((button) => {
+        button.classList.remove("is-selected");
+      });
+    }
+  });
+}
+
 simulate();

@@ -317,6 +317,59 @@ canvas {
     background: #fafafa;
 }
 
+/* ====================
+   想定年利プリセット
+==================== */
+
+.return-presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.return-preset {
+  appearance: none;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+  border-radius: 6px;
+  padding: 7px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.return-preset:hover {
+  background: #f9fafb;
+}
+
+.return-preset.is-selected {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.return-preset:focus-visible {
+  outline: 2px solid rgba(37, 99, 235, 0.25);
+  outline-offset: 1px;
+}
+
+@media (max-width: 650px) {
+  .return-presets {
+    gap: 6px;
+  }
+
+  .return-preset {
+    padding: 8px 6px;
+    font-size: 13px;
+  }
+}
+
 
 /* ====================
    スマホ
@@ -411,3 +464,4 @@ canvas {
     user-select: none;
     }
 }
+
