@@ -3,19 +3,45 @@ let lastChartData = null;
 function yen(n) {
   n = Math.round(n);
 
+  // 1兆円以上
+  if (n >= 100000000) {
+    const cho = Math.floor(n / 100000000);
+    const remainder = n % 100000000;
+
+    const oku = Math.floor(remainder / 10000);
+    const man = remainder % 10000;
+
+    let result = cho + "兆";
+
+    if (oku > 0) {
+      result += oku + "億";
+    }
+
+    if (man > 0) {
+      result += man + "万円";
+    } else {
+      result += "円";
+    }
+
+    return result;
+  }
+
+  // 1億円以上
   if (n >= 10000) {
     const oku = Math.floor(n / 10000);
     const man = n % 10000;
 
     if (man === 0) {
-      return oku.toLocaleString() + "億円";
+      return oku + "億円";
     }
 
-    return oku.toLocaleString() + "億" + man.toLocaleString() + "万円";
+    return oku + "億" + man + "万円";
   }
 
-  return n.toLocaleString() + "万円";
+  // 1億円未満
+  return n + "万円";
 }
+
 function calcTarget(spend, income, rate) {
   return Math.max(0, spend - income) / rate;
 }
@@ -453,17 +479,32 @@ function draw(series, target, fireAge) {
   // 金額表示
   // ==================================================
   function formatAxisMoney(value) {
+    value = Math.round(value);
+
+    // 1兆円以上
+    if (value >= 100000000) {
+      const cho = value / 100000000;
+
+      if (Number.isInteger(cho)) {
+        return cho + "兆円";
+      }
+
+      return cho.toFixed(1).replace(".0", "") + "兆円";
+    }
+
+    // 1億円以上
     if (value >= 10000) {
       const oku = value / 10000;
 
-      if (oku >= 10) {
-        return oku.toFixed(0) + "億円";
+      if (Number.isInteger(oku)) {
+        return oku + "億円";
       }
 
       return oku.toFixed(1).replace(".0", "") + "億円";
     }
 
-    return Math.round(value).toLocaleString() + "万円";
+    // 1億円未満
+    return value + "万円";
   }
 
   // ==================================================
@@ -1095,19 +1136,16 @@ function setupChartInteraction(
       ">
         ${point.age}歳
       </div>
-
       <div>
         資産：
         <strong>
-          ${Math.round(point.assets).toLocaleString()}万円
+          ${yen(point.assets)}
         </strong>
       </div>
-
       <div>
         FIRE目標：
-        ${Math.round(state.target).toLocaleString()}万円
+        ${yen(state.target)}
       </div>
-
       ${
         reached
           ? `
