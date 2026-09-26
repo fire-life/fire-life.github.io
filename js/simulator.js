@@ -255,8 +255,10 @@ function simulate(userAction = false) {
   const age =
     +document.getElementById("age").value;
 
-  let assets =
+  const initialAssets =
     +document.getElementById("assets").value;
+
+  let assets = initialAssets;
 
   const monthly =
     +document.getElementById("monthly").value;
@@ -287,6 +289,14 @@ function simulate(userAction = false) {
   ];
 
   let found = {};
+
+  rates.forEach((rate) => {
+    const target = calcTarget(spend, income, rate);
+
+    if (assets >= target) {
+      found[rate] = age;
+    }
+  });
 
   for (
     let y = 1;
@@ -324,6 +334,164 @@ function simulate(userAction = false) {
     });
   }
   let html = "";
+
+  // =========================
+  // メイン結果（4%取り崩し）
+  // =========================
+
+  const mainRate = 0.04;
+
+  const mainTarget =
+    calcTarget(
+      spend,
+      income,
+      mainRate
+    );
+
+  const mainFireAge =
+    found[mainRate];
+
+  const mainIsAchieved =
+    mainFireAge !== undefined;
+
+  const yearsToFire =
+    mainIsAchieved
+      ? Math.max(0, mainFireAge - age)
+      : null;
+
+  const progress =
+    mainTarget > 0
+      ? Math.min(
+          100,
+          Math.round(
+            (initialAssets / mainTarget) * 100
+          )
+        )
+      : 100;
+
+  const fireType =
+    income > 0
+      ? "サイドFIRE"
+      : "FIRE";
+
+  if (mainIsAchieved) {
+
+    if (yearsToFire === 0) {
+
+      html += `
+        <div class="fire-main-result">
+
+          <div class="fire-result-label">
+            🎉 ${fireType}達成可能
+          </div>
+
+          <div class="fire-age">
+            今すぐ
+          </div>
+
+          <div class="fire-years">
+            現在の資産でFIRE条件を満たしています
+          </div>
+
+      `;
+
+    } else {
+
+      html += `
+        <div class="fire-main-result">
+
+          <div class="fire-result-label">
+            🎉 ${fireType}達成目安
+          </div>
+
+          <div class="fire-age">
+            ${mainFireAge}歳ごろ
+          </div>
+
+          <div class="fire-years">
+            あと${yearsToFire}年
+          </div>
+
+      `;
+
+    }
+
+  } else {
+
+    html += `
+      <div class="fire-main-result">
+
+        <div class="fire-result-label">
+          📈 ${fireType}達成まで
+        </div>
+
+        <div class="fire-age">
+          80歳までに未達
+        </div>
+
+        <div class="fire-years">
+          積立額や生活費などの条件を見直してみましょう
+        </div>
+
+    `;
+
+  }
+
+
+  // =========================
+  // 必要資産・現在資産
+  // =========================
+
+  html += `
+
+        <div class="fire-assets">
+
+          <div class="fire-asset-item">
+            <span>FIREに必要な資産</span>
+            <strong>${yen(mainTarget)}</strong>
+          </div>
+
+          <div class="fire-asset-item">
+            <span>現在の資産</span>
+            <strong>${yen(initialAssets)}</strong>
+          </div>
+
+        </div>
+
+
+        <div class="fire-progress">
+
+          <div class="fire-progress-label">
+            FIRE目標までの進捗
+            <span>${progress}%</span>
+          </div>
+
+          <div class="fire-progress-bar">
+            <div
+              class="fire-progress-fill"
+              style="width:${progress}%"
+            ></div>
+          </div>
+
+        </div>
+
+      </div>
+
+  `;
+
+
+  // =========================
+  // 取り崩し率別の結果
+  // =========================
+
+  html += `
+    <div class="result-detail-title">
+      取り崩し率別の結果
+    </div>
+
+    <div class="fire-rate-results">
+  `;
+
   rates.forEach((rate) => {
 
     const target =
@@ -345,7 +513,12 @@ function simulate(userAction = false) {
         <div>到達目安：${fa}</div>
       </div>
     `;
+
   });
+
+  html += `
+    </div>
+  `;
 
   document.getElementById(
     "summary"
