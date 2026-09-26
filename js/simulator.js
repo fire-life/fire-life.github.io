@@ -161,37 +161,52 @@ function validateInputs() {
 ========================= */
 
 function showValidationError(message, input) {
+  // 以前のエラーを削除
+  const oldError = document.getElementById("validationError");
+
+  if (oldError) {
+    oldError.remove();
+  }
+
   const error = document.createElement("div");
 
   error.id = "validationError";
-  error.textContent = message;
+  error.textContent = "⚠ " + message;
 
+  // エラー表示の見た目
   error.style.background = "#fff1f2";
   error.style.border = "1px solid #fecdd3";
   error.style.borderRadius = "8px";
-  error.style.padding = "12px 14px";
-  error.style.marginTop = "14px";
+  error.style.padding = "10px 12px";
+  error.style.marginTop = "8px";
   error.style.color = "#be123c";
-  error.style.fontSize = "14px";
-  error.style.lineHeight = "1.6";
+  error.style.fontSize = "13px";
+  error.style.fontWeight = "600";
+  error.style.lineHeight = "1.5";
+  error.style.boxSizing = "border-box";
+  error.style.width = "100%";
 
-  // summaryの前にエラーを表示
-  const summary = document.getElementById("summary");
+  // エラー状態
+  input.setAttribute("aria-invalid", "true");
 
-  if (summary) {
-    summary.parentNode.insertBefore(
-      error,
-      summary
-    );
+  // ==============================
+  // 入力欄を含む .field を取得
+  // ==============================
+  const field = input.closest(".field");
+
+  if (field) {
+    // 説明文の直前にエラーを入れる
+    // → 入力欄・単位のすぐ下になる
+    const help = field.querySelector(".input-help");
+
+    if (help) {
+      field.insertBefore(error, help);
+    } else {
+      field.appendChild(error);
+    }
   }
 
-  // 入力欄をエラー状態にする
-  input.setAttribute(
-    "aria-invalid",
-    "true"
-  );
-
-  // エラー箇所へ移動
+  // 入力欄へフォーカス
   input.focus();
 }
 
