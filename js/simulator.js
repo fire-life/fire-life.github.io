@@ -374,18 +374,20 @@ function simulate(userAction = false) {
     chartFireAge
   );
 
-  // スマホでは計算後に結果へ移動
-  if (
-    userAction &&
-    window.innerWidth <= 650
-  ) {
-    const conditionPanel =
-      document.getElementById("conditionPanel");
+  // 計算後に結果へ移動
+  if (userAction) {
 
-    if (conditionPanel) {
-      conditionPanel.open = false;
+    // スマホでは条件パネルを閉じる
+    if (window.innerWidth <= 650) {
+      const conditionPanel =
+        document.getElementById("conditionPanel");
+
+      if (conditionPanel) {
+        conditionPanel.open = false;
+      }
     }
 
+    // PC・スマホ共通で結果へ移動
     const results =
       document.getElementById("results");
 
