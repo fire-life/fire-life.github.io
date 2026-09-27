@@ -285,7 +285,42 @@ td:first-child {
    グラフ
 ==================== */
 
+.chart-card {
+    overflow: hidden;
+}
+
+.chart-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+
+.chart-header h2 {
+    margin-bottom: 2px;
+}
+
+.chart-subtitle {
+    margin: 0;
+    color: #777;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.chart-badge {
+    flex: 0 0 auto;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
 .chart-wrap {
+    position: relative;
     width: 100%;
     overflow: hidden;
 }
@@ -294,15 +329,32 @@ canvas {
     display: block;
     width: 100%;
     height: 360px;
-    border: 1px solid #eee;
-    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
     box-sizing: border-box;
 }
 
 .chart-note {
     margin-top: 10px;
-    font-size: 13px;
-    color: #666;
+    font-size: 12px;
+    color: #777;
+}
+
+@media (max-width: 650px) {
+
+    .chart-header {
+        align-items: center;
+    }
+
+    .chart-subtitle {
+        font-size: 12px;
+    }
+
+    .chart-badge {
+        font-size: 10px;
+        padding: 4px 8px;
+    }
 }
 
 
@@ -590,10 +642,13 @@ canvas {
 
     /* 選択用レイヤー */
     .chart-selection-overlay {
-    touch-action: none;
-    pointer-events: none;
-    -webkit-user-select: none;
-    user-select: none;
+        touch-action: none;
+        pointer-events: none;
+        -webkit-user-select: none;
+        user-select: none;
+
+        background: transparent !important;
+        border: 0;
     }
 }
 

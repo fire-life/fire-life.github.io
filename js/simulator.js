@@ -606,12 +606,14 @@ function simulate(userAction = false) {
 ========================= */
 
 function draw(series, target, fireAge) {
+
   const c = document.getElementById("chart");
   const ctx = c.getContext("2d");
 
   // ==================================================
   // キャンバスを実際の表示サイズに合わせる
   // ==================================================
+
   const rect = c.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
 
@@ -627,6 +629,7 @@ function draw(series, target, fireAge) {
   // ==================================================
   // グラフの余白
   // ==================================================
+
   const pad = {
     l: width < 500 ? 62 : 76,
     r: width < 500 ? 18 : 24,
@@ -634,12 +637,20 @@ function draw(series, target, fireAge) {
     b: 46
   };
 
-  const W = Math.max(100, width - pad.l - pad.r);
-  const H = Math.max(120, height - pad.t - pad.b);
+  const W = Math.max(
+    100,
+    width - pad.l - pad.r
+  );
+
+  const H = Math.max(
+    120,
+    height - pad.t - pad.b
+  );
 
   // ==================================================
   // 最大値
   // ==================================================
+
   const max = Math.max(
     ...series.map((x) => x.assets),
     target
@@ -651,39 +662,46 @@ function draw(series, target, fireAge) {
   // ==================================================
   // 金額表示
   // ==================================================
+
   function formatAxisMoney(value) {
+
     value = Math.round(value);
 
-    // 1兆円以上
     if (value >= 100000000) {
+
       const cho = value / 100000000;
 
       if (Number.isInteger(cho)) {
         return cho + "兆円";
       }
 
-      return cho.toFixed(1).replace(".0", "") + "兆円";
+      return cho
+        .toFixed(1)
+        .replace(".0", "") + "兆円";
     }
 
-    // 1億円以上
     if (value >= 10000) {
+
       const oku = value / 10000;
 
       if (Number.isInteger(oku)) {
         return oku + "億円";
       }
 
-      return oku.toFixed(1).replace(".0", "") + "億円";
+      return oku
+        .toFixed(1)
+        .replace(".0", "") + "億円";
     }
 
-    // 1億円未満
     return value + "万円";
   }
 
   // ==================================================
   // X座標
   // ==================================================
+
   function xOf(age) {
+
     if (maxAge === minAge) {
       return pad.l;
     }
@@ -695,37 +713,76 @@ function draw(series, target, fireAge) {
   // ==================================================
   // Y座標
   // ==================================================
+
   function yOf(value) {
+
     if (max === 0) {
       return pad.t + H;
     }
 
-    return pad.t + H - (value / max) * H;
+    return pad.t +
+      H -
+      (value / max) * H;
   }
+
+  // ==================================================
+  // 背景
+  // ==================================================
+
+  ctx.fillStyle = "#ffffff";
+
+  ctx.fillRect(
+    0,
+    0,
+    width,
+    height
+  );
 
   // ==================================================
   // グリッド線・Y軸
   // ==================================================
-  ctx.strokeStyle = "#e5e7eb";
-  ctx.lineWidth = 1;
 
   for (let i = 0; i <= 5; i++) {
-    const y = pad.t + (H * i) / 5;
 
-    // 横線
+    const y =
+      pad.t +
+      (H * i) / 5;
+
+    // 横グリッド
     ctx.beginPath();
-    ctx.moveTo(pad.l, y);
-    ctx.lineTo(pad.l + W, y);
+
+    ctx.moveTo(
+      pad.l,
+      y
+    );
+
+    ctx.lineTo(
+      pad.l + W,
+      y
+    );
+
+    ctx.strokeStyle =
+      i === 5
+        ? "#dfe3e8"
+        : "#eef1f4";
+
+    ctx.lineWidth =
+      i === 5 ? 1.2 : 1;
+
     ctx.stroke();
 
     // 金額ラベル
-    ctx.fillStyle = "#666";
-    ctx.font = "12px system-ui, sans-serif";
+    ctx.fillStyle = "#7a8088";
+    ctx.font =
+      "12px system-ui, -apple-system, sans-serif";
+
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
 
     ctx.fillText(
-      formatAxisMoney(max * (1 - i / 5)),
+      formatAxisMoney(
+        max * (1 - i / 5)
+      ),
       pad.l - 9,
       y
     );
@@ -733,34 +790,136 @@ function draw(series, target, fireAge) {
 
   // ==================================================
   // FIRE目標ライン
-  // ラベルは常時表示しない
   // ==================================================
+
   const targetY = yOf(target);
 
   ctx.save();
 
-  ctx.setLineDash([7, 5]);
-  ctx.strokeStyle = "#777";
-  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 5]);
+
+  ctx.strokeStyle = "#94a3b8";
+  ctx.lineWidth = 1.5;
 
   ctx.beginPath();
-  ctx.moveTo(pad.l, targetY);
-  ctx.lineTo(pad.l + W, targetY);
+
+  ctx.moveTo(
+    pad.l,
+    targetY
+  );
+
+  ctx.lineTo(
+    pad.l + W,
+    targetY
+  );
+
   ctx.stroke();
 
   ctx.restore();
 
   // ==================================================
-  // 資産推移
+  // FIRE目標ラベル
   // ==================================================
+
+  const targetText =
+    "FIRE目標 " +
+    formatAxisMoney(target);
+
+  ctx.font =
+    "600 11px system-ui, -apple-system, sans-serif";
+
+  const targetTextWidth =
+    ctx.measureText(targetText).width;
+
+  const targetLabelWidth =
+    targetTextWidth + 16;
+
+  const targetLabelHeight = 22;
+
+  let targetLabelX =
+    pad.l + 8;
+
+  let targetLabelY =
+    targetY -
+    targetLabelHeight -
+    5;
+
+  if (
+    targetLabelY <
+    pad.t
+  ) {
+    targetLabelY =
+      targetY + 5;
+  }
+
+  // ラベル背景
+  ctx.fillStyle =
+    "rgba(255,255,255,0.94)";
+
   ctx.beginPath();
 
-  ctx.strokeStyle = "#222";
-  ctx.lineWidth = 3;
-  ctx.lineJoin = "round";
-  ctx.lineCap = "round";
+  ctx.roundRect(
+    targetLabelX,
+    targetLabelY,
+    targetLabelWidth,
+    targetLabelHeight,
+    6
+  );
+
+  ctx.fill();
+
+  // ラベル枠
+  ctx.strokeStyle =
+    "#e2e8f0";
+
+  ctx.lineWidth = 1;
+
+  ctx.stroke();
+
+  // ラベル文字
+  ctx.fillStyle =
+    "#64748b";
+
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+
+  ctx.fillText(
+    targetText,
+    targetLabelX + 8,
+    targetLabelY +
+      targetLabelHeight / 2
+  );
+
+  // ==================================================
+  // 資産推移：塗りつぶし
+  // ==================================================
+
+  const firstPoint = series[0];
+  const lastPoint =
+    series[series.length - 1];
+
+  const areaGradient =
+    ctx.createLinearGradient(
+      0,
+      pad.t,
+      0,
+      pad.t + H
+    );
+
+  areaGradient.addColorStop(
+    0,
+    "rgba(37, 99, 235, 0.13)"
+  );
+
+  areaGradient.addColorStop(
+    1,
+    "rgba(37, 99, 235, 0.01)"
+  );
+
+  ctx.beginPath();
 
   series.forEach((p, i) => {
+
     const x = xOf(p.age);
     const y = yOf(p.assets);
 
@@ -769,6 +928,74 @@ function draw(series, target, fireAge) {
     } else {
       ctx.lineTo(x, y);
     }
+
+  });
+
+  ctx.lineTo(
+    xOf(lastPoint.age),
+    pad.t + H
+  );
+
+  ctx.lineTo(
+    xOf(firstPoint.age),
+    pad.t + H
+  );
+
+  ctx.closePath();
+
+  ctx.fillStyle =
+    areaGradient;
+
+  ctx.fill();
+
+  // ==================================================
+  // 資産推移ライン
+  // ==================================================
+
+  const lineGradient =
+    ctx.createLinearGradient(
+      pad.l,
+      0,
+      pad.l + W,
+      0
+    );
+
+  lineGradient.addColorStop(
+    0,
+    "#334155"
+  );
+
+  lineGradient.addColorStop(
+    0.55,
+    "#2563eb"
+  );
+
+  lineGradient.addColorStop(
+    1,
+    "#1d4ed8"
+  );
+
+  ctx.beginPath();
+
+  ctx.strokeStyle =
+    lineGradient;
+
+  ctx.lineWidth = 3;
+
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+
+  series.forEach((p, i) => {
+
+    const x = xOf(p.age);
+    const y = yOf(p.assets);
+
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+
   });
 
   ctx.stroke();
@@ -776,60 +1003,128 @@ function draw(series, target, fireAge) {
   // ==================================================
   // 現在地点
   // ==================================================
-  const first = series[0];
 
+  const currentX =
+    xOf(firstPoint.age);
+
+  const currentY =
+    yOf(firstPoint.assets);
+
+  // 外側
   ctx.beginPath();
 
   ctx.arc(
-    xOf(first.age),
-    yOf(first.assets),
-    4,
+    currentX,
+    currentY,
+    6,
     0,
     Math.PI * 2
   );
 
-  ctx.fillStyle = "#222";
+  ctx.fillStyle =
+    "#ffffff";
+
+  ctx.fill();
+
+  ctx.strokeStyle =
+    "#334155";
+
+  ctx.lineWidth = 2;
+
+  ctx.stroke();
+
+  // 内側
+  ctx.beginPath();
+
+  ctx.arc(
+    currentX,
+    currentY,
+    2.5,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.fillStyle =
+    "#334155";
+
   ctx.fill();
 
   // ==================================================
   // FIRE達成地点
-  // ラベルは常時表示しない
   // ==================================================
+
   if (fireAge !== undefined) {
-    const firePoint = series.find(
-      (p) => p.age === fireAge
-    );
+
+    const firePoint =
+      series.find(
+        (p) => p.age === fireAge
+      );
 
     if (firePoint) {
-      const x = xOf(firePoint.age);
-      const y = yOf(firePoint.assets);
 
+      const fireX =
+        xOf(firePoint.age);
+
+      const fireY =
+        yOf(firePoint.assets);
+
+      // 外側のリング
       ctx.beginPath();
 
       ctx.arc(
-        x,
-        y,
-        6,
+        fireX,
+        fireY,
+        8,
         0,
         Math.PI * 2
       );
 
-      ctx.fillStyle = "#222";
+      ctx.fillStyle =
+        "#ffffff";
+
       ctx.fill();
+
+      ctx.strokeStyle =
+        "#2563eb";
+
+      ctx.lineWidth = 2.5;
+
+      ctx.stroke();
+
+      // 中央
+      ctx.beginPath();
+
+      ctx.arc(
+        fireX,
+        fireY,
+        3,
+        0,
+        Math.PI * 2
+      );
+
+      ctx.fillStyle =
+        "#2563eb";
+
+      ctx.fill();
+
     }
   }
 
   // ==================================================
   // 軸タイトル
   // ==================================================
-  ctx.fillStyle = "#555";
-  ctx.font = "12px system-ui, sans-serif";
-  ctx.textBaseline = "top";
 
+  ctx.fillStyle =
+    "#64748b";
+
+  ctx.font =
+    "600 11px system-ui, -apple-system, sans-serif";
+
+  ctx.textBaseline = "top";
   ctx.textAlign = "left";
 
   ctx.fillText(
-    "資産（万円）",
+    "資産",
     8,
     8
   );
@@ -837,52 +1132,98 @@ function draw(series, target, fireAge) {
   // ==================================================
   // X軸（年齢）
   // ==================================================
-  ctx.textAlign = "center";
+
+  ctx.textAlign =
+    "center";
+
+  const xLabelY =
+    pad.t + H + 13;
+
+  ctx.fillStyle =
+    "#7a8088";
+
+  ctx.font =
+    "12px system-ui, -apple-system, sans-serif";
 
   if (width < 500) {
+
     const middleAge =
-      Math.round((minAge + maxAge) / 2);
+      Math.round(
+        (minAge + maxAge) / 2
+      );
 
     ctx.fillText(
       minAge + "歳",
       xOf(minAge),
-      pad.t + H + 13
+      xLabelY
     );
 
-    // 同じ年齢が重複する場合は表示しない
     if (
       middleAge !== minAge &&
       middleAge !== maxAge
     ) {
+
       ctx.fillText(
         middleAge + "歳",
         xOf(middleAge),
-        pad.t + H + 13
+        xLabelY
       );
+
     }
 
     ctx.fillText(
       maxAge + "歳",
       xOf(maxAge),
-      pad.t + H + 13
+      xLabelY
     );
+
   } else {
+
     ctx.fillText(
       minAge + "歳",
       xOf(minAge),
-      pad.t + H + 13
+      xLabelY
     );
+
+    // FIRE年齢を表示
+    if (
+      fireAge !== undefined &&
+      fireAge !== minAge &&
+      fireAge !== maxAge
+    ) {
+
+      ctx.fillStyle =
+        "#2563eb";
+
+      ctx.font =
+        "600 12px system-ui, -apple-system, sans-serif";
+
+      ctx.fillText(
+        "FIRE " + fireAge + "歳",
+        xOf(fireAge),
+        xLabelY
+      );
+
+    }
+
+    ctx.fillStyle =
+      "#7a8088";
+
+    ctx.font =
+      "12px system-ui, -apple-system, sans-serif";
 
     ctx.fillText(
       maxAge + "歳",
       xOf(maxAge),
-      pad.t + H + 13
+      xLabelY
     );
+
   }
 
   // ==================================================
   // グラフ操作をセットアップ
   // ==================================================
+
   setupChartInteraction(
     c,
     series,
@@ -1034,9 +1375,10 @@ function setupChartInteraction(
     overlay.style.width = "100%";
     overlay.style.height = "100%";
 
-    /*
-     * タッチイベントは本体Canvasで受け取る
-     */
+    // 選択表示用Canvasは必ず透明にする
+    overlay.style.backgroundColor = "transparent";
+
+    // タッチイベントは本体Canvasで受け取る
     overlay.style.pointerEvents = "none";
 
     parent.appendChild(overlay);

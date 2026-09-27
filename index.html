@@ -291,16 +291,27 @@
        グラフ
   ==================== -->
 
-  <div class="card">
+  <div class="card chart-card">
 
-    <h2>資産推移</h2>
+    <div class="chart-header">
+      <div>
+        <h2>資産推移</h2>
+        <p class="chart-subtitle">
+          FIRE達成までの資産形成をチェック
+        </p>
+      </div>
+
+      <span class="chart-badge">
+        4%取り崩し
+      </span>
+    </div>
 
     <div class="chart-wrap">
       <canvas id="chart"></canvas>
     </div>
 
     <p class="chart-note">
-      ※ グラフは4%取り崩し率を基準に表示しています。
+      グラフを左右に動かすと、年齢ごとの資産を確認できます。
     </p>
 
   </div>
