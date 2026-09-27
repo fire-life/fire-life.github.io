@@ -336,7 +336,7 @@ function simulate(userAction = false) {
   let html = "";
 
   // =========================
-  // メイン結果（4%取り崩し）
+  // FIREダッシュボード
   // =========================
 
   const mainRate = 0.04;
@@ -374,44 +374,46 @@ function simulate(userAction = false) {
       ? "サイドFIRE"
       : "FIRE";
 
+
+  // =========================
+  // メイン結果
+  // =========================
+
+  html += `
+    <div class="fire-dashboard">
+
+      <div class="fire-hero">
+
+        <div class="fire-hero-label">
+          ${fireType}達成予定
+        </div>
+  `;
+
+
   if (mainIsAchieved) {
 
     if (yearsToFire === 0) {
 
       html += `
-        <div class="fire-main-result">
+        <div class="fire-hero-age">
+          今すぐ
+        </div>
 
-          <div class="fire-result-label">
-            🎉 ${fireType}達成可能
-          </div>
-
-          <div class="fire-age">
-            今すぐ
-          </div>
-
-          <div class="fire-years">
-            現在の資産でFIRE条件を満たしています
-          </div>
-
+        <div class="fire-hero-years">
+          現在の資産でFIRE条件を満たしています
+        </div>
       `;
 
     } else {
 
       html += `
-        <div class="fire-main-result">
+        <div class="fire-hero-age">
+          ${mainFireAge}歳
+        </div>
 
-          <div class="fire-result-label">
-            🎉 ${fireType}達成目安
-          </div>
-
-          <div class="fire-age">
-            ${mainFireAge}歳ごろ
-          </div>
-
-          <div class="fire-years">
-            あと${yearsToFire}年
-          </div>
-
+        <div class="fire-hero-years">
+          あと${yearsToFire}年
+        </div>
       `;
 
     }
@@ -419,78 +421,128 @@ function simulate(userAction = false) {
   } else {
 
     html += `
-      <div class="fire-main-result">
+      <div class="fire-hero-age fire-hero-age-unreached">
+        80歳までに未達
+      </div>
 
-        <div class="fire-result-label">
-          📈 ${fireType}達成まで
-        </div>
-
-        <div class="fire-age">
-          80歳までに未達
-        </div>
-
-        <div class="fire-years">
-          積立額や生活費などの条件を見直してみましょう
-        </div>
-
+      <div class="fire-hero-years">
+        条件を見直すとFIRE時期を早められる可能性があります
+      </div>
     `;
 
   }
 
 
-  // =========================
-  // 必要資産・現在資産
-  // =========================
-
   html += `
 
-        <div class="fire-assets">
+        <div class="fire-hero-info">
 
-          <div class="fire-asset-item">
-            <span>FIREに必要な資産</span>
-            <strong>${yen(mainTarget)}</strong>
+          <span>
+            現在 ${age}歳
+          </span>
+
+          <span class="fire-hero-dot">
+            •
+          </span>
+
+          <span>
+            ${fireType}
+          </span>
+
+          <span class="fire-hero-dot">
+            •
+          </span>
+
+          <span>
+            4%取り崩し
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- =========================
+          資産サマリー
+      ========================= -->
+
+      <div class="fire-stat-grid">
+
+        <div class="fire-stat-card">
+
+          <div class="fire-stat-label">
+            現在の資産
           </div>
 
-          <div class="fire-asset-item">
-            <span>現在の資産</span>
-            <strong>${yen(initialAssets)}</strong>
+          <div class="fire-stat-value">
+            ${yen(initialAssets)}
           </div>
 
         </div>
 
 
-        <div class="fire-progress">
+        <div class="fire-stat-card fire-stat-card-target">
 
-          <div class="fire-progress-label">
-            FIRE目標までの進捗
-            <span>${progress}%</span>
+          <div class="fire-stat-label">
+            FIREに必要な資産
           </div>
 
-          <div class="fire-progress-bar">
-            <div
-              class="fire-progress-fill"
-              style="width:${progress}%"
-            ></div>
+          <div class="fire-stat-value">
+            ${yen(mainTarget)}
           </div>
 
         </div>
 
       </div>
 
+
+      <!-- =========================
+          FIRE進捗
+      ========================= -->
+
+      <div class="fire-progress-card">
+
+        <div class="fire-progress-header">
+
+          <span>
+            FIREまでの資産進捗
+          </span>
+
+          <strong>
+            ${progress}%
+          </strong>
+
+        </div>
+
+        <div class="fire-progress-bar">
+
+          <div
+            class="fire-progress-fill"
+            style="width:${progress}%"
+          ></div>
+
+        </div>
+
+        <div class="fire-progress-caption">
+          ${yen(initialAssets)}
+          ／
+          ${yen(mainTarget)}
+        </div>
+
+      </div>
+
+
+      <!-- =========================
+          取り崩し率別
+      ========================= -->
+
+      <div class="result-detail-title">
+        取り崩し率別の結果
+      </div>
+
+      <div class="fire-rate-results">
   `;
 
-
-  // =========================
-  // 取り崩し率別の結果
-  // =========================
-
-  html += `
-    <div class="result-detail-title">
-      取り崩し率別の結果
-    </div>
-
-    <div class="fire-rate-results">
-  `;
 
   rates.forEach((rate) => {
 
@@ -506,19 +558,49 @@ function simulate(userAction = false) {
         ? "80歳までに未達"
         : found[rate] + "歳";
 
+    const isMainRate =
+      rate === mainRate;
+
     html += `
-      <div class="result">
-        <div>${(rate * 100).toFixed(1)}%取り崩し</div>
-        <div class="big">${yen(target)}</div>
-        <div>到達目安：${fa}</div>
+      <div class="
+        result
+        ${isMainRate ? "is-main-rate" : ""}
+      ">
+
+        <div class="fire-rate-label">
+
+          ${(rate * 100).toFixed(1)}%
+          取り崩し
+
+          ${
+            isMainRate
+              ? `<span class="fire-rate-badge">基準</span>`
+              : ""
+          }
+
+        </div>
+
+        <div class="big">
+          ${yen(target)}
+        </div>
+
+        <div class="fire-rate-age">
+          ${fa}
+        </div>
+
       </div>
     `;
 
   });
 
+
   html += `
+
+      </div>
+
     </div>
   `;
+
 
   document.getElementById(
     "summary"

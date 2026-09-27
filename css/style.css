@@ -423,103 +423,170 @@ canvas {
 }
 
 /* ====================
-   結果画面
+   FIRE結果ダッシュボード
 ==================== */
 
 #summary {
     display: block;
 }
 
-.fire-main-result {
-    margin-bottom: 24px;
-    padding: 24px 20px;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    background: #fafafa;
+.fire-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+
+/* ====================
+   FIREメイン結果
+==================== */
+
+.fire-hero {
+    padding: 30px 20px 26px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: linear-gradient(
+        180deg,
+        #f8fafc 0%,
+        #ffffff 100%
+    );
     text-align: center;
 }
 
-.fire-result-label {
+.fire-hero-label {
     font-size: 14px;
     font-weight: 700;
-    color: #555;
-    margin-bottom: 6px;
+    color: #64748b;
+    letter-spacing: 0.04em;
 }
 
-.fire-age {
-    font-size: 32px;
+.fire-hero-age {
+    margin-top: 6px;
+    font-size: 46px;
     font-weight: 800;
-    line-height: 1.3;
-    color: #222;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    color: #1e293b;
 }
 
-.fire-years {
-    margin-top: 4px;
-    font-size: 18px;
+.fire-hero-years {
+    margin-top: 5px;
+    font-size: 19px;
     font-weight: 700;
-    color: #555;
+    color: #475569;
 }
 
-.fire-assets {
+.fire-hero-age-unreached {
+    font-size: 32px;
+}
+
+.fire-hero-info {
     display: flex;
-    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.fire-hero-dot {
+    color: #cbd5e1;
+}
+
+
+/* ====================
+   資産サマリー
+==================== */
+
+.fire-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
 }
 
-.fire-asset-item {
-    padding: 12px;
-    background: #fff;
+.fire-stat-card {
+    padding: 18px;
     border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    border-radius: 12px;
+    background: #fff;
 }
 
-.fire-asset-item span {
-    display: block;
+.fire-stat-card-target {
+    background: #f8fafc;
+}
+
+.fire-stat-label {
+    margin-bottom: 5px;
     font-size: 12px;
-    color: #666;
-    margin-bottom: 4px;
+    color: #64748b;
 }
 
-.fire-asset-item strong {
-    display: block;
-    font-size: 18px;
-    font-weight: 700;
+.fire-stat-value {
+    font-size: 21px;
+    font-weight: 800;
+    color: #1e293b;
 }
 
-.fire-progress {
-    margin-top: 18px;
-    text-align: left;
+
+/* ====================
+   FIRE進捗
+==================== */
+
+.fire-progress-card {
+    padding: 18px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
 }
 
-.fire-progress-label {
+.fire-progress-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 6px;
-    font-size: 12px;
-    color: #555;
+    align-items: center;
+    margin-bottom: 9px;
+    font-size: 13px;
+    color: #475569;
+}
+
+.fire-progress-header strong {
+    font-size: 16px;
+    color: #1e293b;
 }
 
 .fire-progress-bar {
     width: 100%;
-    height: 8px;
+    height: 9px;
     overflow: hidden;
     border-radius: 999px;
-    background: #e5e7eb;
+    background: #e2e8f0;
 }
 
 .fire-progress-fill {
     height: 100%;
-    border-radius: 999px;
+    border-radius: inherit;
     background: #2563eb;
+    transition: width 0.4s ease;
 }
 
-/* 取り崩し率別の結果 */
+.fire-progress-caption {
+    margin-top: 7px;
+    text-align: right;
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+
+/* ====================
+   取り崩し率別
+==================== */
 
 .result-detail-title {
-    margin: 20px 0 10px;
-    font-size: 15px;
+    margin: 4px 0 -6px;
+    font-size: 14px;
     font-weight: 700;
-    color: #444;
+    color: #475569;
 }
 
 .fire-rate-results {
@@ -529,28 +596,95 @@ canvas {
 }
 
 .result {
-    padding: 15px;
-    background: #f1f3f5;
-    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #f8fafc;
 }
 
-.big {
-    font-size: 24px;
+.result.is-main-rate {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+}
+
+.fire-rate-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.fire-rate-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #2563eb;
+    font-size: 10px;
     font-weight: 700;
 }
 
+.big {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.3;
+    color: #1e293b;
+}
+
+.fire-rate-age {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #64748b;
+}
+
+
+/* ====================
+   スマホ
+==================== */
+
 @media (max-width: 650px) {
 
-    .fire-main-result {
-        padding: 22px 14px;
+    .fire-hero {
+        padding: 26px 14px 22px;
     }
 
-    .fire-age {
-        font-size: 30px;
+    .fire-hero-age {
+        font-size: 40px;
+    }
+
+    .fire-hero-age-unreached {
+        font-size: 27px;
+    }
+
+    .fire-hero-years {
+        font-size: 17px;
+    }
+
+    .fire-hero-info {
+        font-size: 11px;
+    }
+
+    .fire-stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .fire-stat-card {
+        padding: 15px;
+    }
+
+    .fire-stat-value {
+        font-size: 19px;
     }
 
     .fire-rate-results {
         grid-template-columns: 1fr;
+    }
+
+    .result {
+        padding: 15px;
     }
 
 }
