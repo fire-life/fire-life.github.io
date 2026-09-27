@@ -786,3 +786,291 @@ canvas {
     }
 }
 
+/* ====================
+   入力画面：洗練UI
+==================== */
+
+/* 条件入力のヘッダー */
+
+#conditionPanel summary.condition-summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+}
+
+.condition-summary-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 18px;
+}
+
+.condition-summary-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.condition-summary-text strong {
+    font-size: 18px;
+    color: #1e293b;
+}
+
+.condition-summary-text small {
+    font-size: 12px;
+    font-weight: 400;
+    color: #64748b;
+}
+
+
+/* ====================
+   セクション見出し
+==================== */
+
+.input-section-title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 18px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.section-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+
+/* ====================
+   入力フィールド
+==================== */
+
+.field {
+    padding: 14px;
+    border: 1px solid #eef0f3;
+    border-radius: 11px;
+    background: #fafbfc;
+    transition:
+        border-color 0.15s ease,
+        background-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.field:focus-within {
+    border-color: #bfdbfe;
+    background: #fff;
+    box-shadow: 0 0 0 3px #2563eb0d;
+}
+
+.field label {
+    margin-bottom: 7px;
+    font-size: 13px;
+    color: #475569;
+}
+
+
+/* ====================
+   入力欄
+==================== */
+
+.field input {
+    background: #fff;
+    border-color: #dbe1e8;
+    font-weight: 600;
+}
+
+.field input:hover {
+    border-color: #b8c1cc;
+}
+
+.field input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px #2563eb14;
+}
+
+
+/* ====================
+   単位
+==================== */
+
+.input-with-unit {
+    gap: 7px;
+}
+
+.input-with-unit span {
+    min-width: 28px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+/* ====================
+   補足説明
+==================== */
+
+.input-help {
+    margin-top: 6px;
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+
+/* ====================
+   セクション間
+==================== */
+
+.input-section {
+    margin-top: 30px;
+    padding-top: 26px;
+    border-top: 1px solid #edf0f3;
+}
+
+.input-section:first-of-type {
+    padding-top: 12px;
+}
+
+
+/* ====================
+   ヒント
+==================== */
+
+.tip {
+    margin-top: 12px;
+    padding: 11px 13px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.tip strong {
+    color: #475569;
+}
+
+
+/* ====================
+   想定年利プリセット
+==================== */
+
+.return-presets {
+    margin-bottom: 9px;
+}
+
+.return-preset {
+    border-radius: 8px;
+    border-color: #dbe1e8;
+    background: #fff;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.return-preset:hover {
+    border-color: #93c5fd;
+    background: #f8fbff;
+}
+
+.return-preset.is-selected {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+}
+
+
+/* ====================
+   実行ボタン
+==================== */
+
+.simulate-button {
+    margin-top: 30px;
+    padding: 15px 20px;
+    border-radius: 11px;
+    background: #1e293b;
+    box-shadow: 0 4px 10px #00000012;
+    transition:
+        background-color 0.15s ease,
+        box-shadow 0.15s ease,
+        transform 0.05s ease;
+}
+
+.simulate-button:hover {
+    opacity: 1;
+    background: #0f172a;
+    box-shadow: 0 6px 14px #00000018;
+}
+
+.simulate-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 6px #00000012;
+}
+
+
+/* ====================
+   スマホ
+==================== */
+
+@media (max-width: 650px) {
+
+    #conditionPanel summary.condition-summary {
+        gap: 10px;
+    }
+
+    .condition-summary-icon {
+        flex-basis: 34px;
+        width: 34px;
+        height: 34px;
+        font-size: 16px;
+    }
+
+    .condition-summary-text strong {
+        font-size: 17px;
+    }
+
+    .condition-summary-text small {
+        font-size: 11px;
+    }
+
+    .field {
+        padding: 13px;
+    }
+
+    .input-section-title {
+        margin-bottom: 15px;
+    }
+
+}
+
+.condition-note {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 14px;
+    padding: 9px 11px;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.condition-note span {
+    font-size: 13px;
+}
