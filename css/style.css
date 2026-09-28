@@ -39,18 +39,6 @@ p {
     font-size: 14px;
 }
 
-.mvp-badge {
-    display: inline-block;
-    margin-right: 8px;
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: #f1f3f5;
-    color: #666;
-    font-size: 12px;
-    font-weight: 600;
-    vertical-align: 2px;
-}
-
 /* ====================
    カード
 ==================== */

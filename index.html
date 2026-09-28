@@ -4,30 +4,85 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>FIRE達成時期シミュレーター MVP</title>
+
+  <!-- ページタイトル -->
+  <title>FIRE達成時期シミュレーター｜何歳でFIREできる？</title>
+
+  <!-- 検索結果向け説明文 -->
+  <meta
+    name="description"
+    content="現在の資産・積立額・生活費などから、FIREに必要な資産と達成時期をシミュレーションできます。4%取り崩しやサイドFIREにも対応。"
+  >
 
   <!-- Google Search Console -->
-  <meta name="google-site-verification" content="Y9g1kMQJwi6HpaXdRKzJb4nqKXXeWTmrJdP54yDt7sQ" />
+  <meta
+    name="google-site-verification"
+    content="Y9g1kMQJwi6HpaXdRKzJb4nqKXXeWTmrJdP54yDt7sQ"
+  >
 
+  <!-- OGP -->
+  <meta
+    property="og:title"
+    content="FIRE達成時期シミュレーター｜何歳でFIREできる？"
+  >
+  <meta
+    property="og:description"
+    content="現在の資産・積立額・生活費などから、FIREに必要な資産と達成時期をシミュレーションできます。4%取り崩しやサイドFIREにも対応。"
+  >
+  <meta
+    property="og:type"
+    content="website"
+  >
+  <meta
+    property="og:locale"
+    content="ja_JP"
+  >
+
+  <!-- サイト名 -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "FIRE達成時期シミュレーター",
+    "alternateName": "FIREシミュレーター",
+    "url": "https://fire-life.github.io/"
+  }
+  </script>
+
+  <!-- CSS / JavaScript -->
   <link rel="stylesheet" href="css/style.css">
   <script src="js/simulator.js" defer></script>
 
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NG20VCZBQ1"></script>
+  <script
+    async
+    src="https://www.googletagmanager.com/gtag/js?id=G-NG20VCZBQ1"
+  ></script>
+
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
 
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
     gtag('config', 'G-NG20VCZBQ1');
   </script>
-  
+
   <!-- Clarity -->
   <script type="text/javascript">
     (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        c[a]=c[a]||function(){
+          (c[a].q=c[a].q||[]).push(arguments)
+        };
+
+        t=l.createElement(r);
+        t.async=1;
+        t.src="https://www.clarity.ms/tag/"+i;
+
+        y=l.getElementsByTagName(r)[0];
+        y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "yljt2ghzxx");
   </script>
 </head>
@@ -36,7 +91,6 @@
   <h1>FIRE達成時期シミュレーター</h1>
 
   <p class="lead">
-    <span class="mvp-badge">MVP版</span>
     現在の資産・積立額・生活費などを入力すると、<br>
     FIREに必要な資産と達成時期をシミュレーションできます。
   </p>
