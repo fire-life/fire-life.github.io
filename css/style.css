@@ -1074,3 +1074,41 @@ canvas {
 .condition-note span {
     font-size: 13px;
 }
+
+/* ====================
+   条件入力 開閉アイコン
+==================== */
+
+#conditionPanel summary {
+  list-style: none;
+}
+
+#conditionPanel summary::-webkit-details-marker {
+  display: none;
+}
+
+.condition-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.condition-summary-icon {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.condition-summary-icon::before {
+  content: "▶";
+}
+
+#conditionPanel[open] .condition-summary-icon::before {
+  content: "▼";
+}
