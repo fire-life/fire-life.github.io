@@ -1100,3 +1100,100 @@ canvas {
 #conditionPanel[open] .condition-summary-icon::before {
   content: "▼";
 }
+
+/* ====================
+   シミュレーターCTA
+==================== */
+
+.simulator-cta {
+    margin: 28px 0;
+    padding: 22px 24px;
+    border: 1px solid #bfdbfe;
+    border-radius: 14px;
+    background: #f8fbff;
+}
+
+.simulator-cta-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.simulator-cta-text {
+    min-width: 0;
+}
+
+.simulator-cta-label {
+    margin-bottom: 4px;
+    font-size: 17px;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.simulator-cta-description {
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.simulator-cta-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-width: 210px;
+    padding: 12px 18px;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 4px 10px #2563eb1f;
+    transition:
+        background-color 0.15s ease,
+        box-shadow 0.15s ease,
+        transform 0.05s ease;
+}
+
+.simulator-cta-button:hover {
+    background: #1d4ed8;
+    color: #fff;
+    box-shadow: 0 6px 14px #2563eb2b;
+}
+
+.simulator-cta-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 6px #2563eb1f;
+}
+
+@media (max-width: 650px) {
+
+    .simulator-cta {
+        margin: 24px 0;
+        padding: 18px;
+    }
+
+    .simulator-cta-content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+    }
+
+    .simulator-cta-label {
+        font-size: 16px;
+    }
+
+    .simulator-cta-description {
+        font-size: 12px;
+    }
+
+    .simulator-cta-button {
+        width: 100%;
+        min-width: 0;
+        padding: 13px 18px;
+    }
+
+}
