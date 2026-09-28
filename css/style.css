@@ -1358,5 +1358,30 @@ canvas {
     .table-wrap table {
         min-width: 520px;
     }
+    
+    .simulator-cta {
+        margin:24px 0;
+        padding:18px;
+    }
 
+    .simulator-cta-content {
+        flex-direction:column;
+        align-items:stretch;
+        gap:14px;
+    }
+
+    .simulator-cta-label {
+        font-size:16px;
+    }
+
+    .simulator-cta-description {
+        font-size:12px;
+    }
+
+    .simulator-cta-button {
+        width:100%;
+        min-width:0;
+        padding:13px 18px;
+        box-sizing:border-box;
+    }
 }
