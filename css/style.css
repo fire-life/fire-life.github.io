@@ -1302,8 +1302,16 @@ canvas {
 }
 
 .table-wrap table {
-    min-width: 560px;
+    width: 100%;
+    min-width: 0;
     margin: 0;
+    table-layout: fixed;
+}
+
+.table-wrap th,
+.table-wrap td {
+    overflow-wrap: anywhere;
+    word-break: normal;
 }
 
 
@@ -1356,7 +1364,17 @@ canvas {
     }
 
     .table-wrap table {
-        min-width: 520px;
+        width: 100%;
+        min-width: 0;
+        font-size: 12px;
+        table-layout: fixed;
+    }
+
+    .table-wrap th,
+    .table-wrap td {
+        padding: 7px 5px;
+        line-height: 1.45;
+        overflow-wrap: anywhere;
     }
     
     .simulator-cta {
