@@ -1403,3 +1403,15 @@ canvas {
         box-sizing:border-box;
     }
 }
+
+/* ====================
+   条件入力：PCでは3列で圧縮
+==================== */
+
+@media (min-width: 651px) {
+
+    #conditionPanel .grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+}

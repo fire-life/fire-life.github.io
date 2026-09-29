@@ -2419,7 +2419,7 @@ returnPresets.forEach((button) => {
       new Event("input", { bubbles: true })
     );
 
-    returnInput.focus();
+    button.blur();
   });
 });
 
